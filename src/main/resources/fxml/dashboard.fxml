@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.sikerma.sikerma.controller.DashboardController"
+            style="-fx-background-color: #ecf0f1;">
+
+    <!-- TOP HEADER (User Info & Logout) -->
+    <top>
+        <HBox alignment="CENTER_RIGHT" spacing="15" style="-fx-background-color: white; -fx-padding: 10 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+            <Label fx:id="lblUserName" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="User Name"/>
+            <Label fx:id="lblUserRole" style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;" text="(Role)"/>
+            <Button onAction="#handleLogout" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand;" text="Logout" />
+        </HBox>
+    </top>
+
+    <!-- SIDEBAR KIRI -->
+    <left>
+        <VBox spacing="5" style="-fx-background-color: #2c3e50; -fx-padding: 20; -fx-pref-width: 220;">
+            <!-- Judul Aplikasi di Sidebar -->
+            <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white; -fx-padding: 0 0 20 0;" text="SIKERMA"/>
+
+            <!-- Tombol Menu -->
+            <Button onAction="#handleDashboard" maxWidth="Infinity" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 12;" text="📊 Dashboard"/>
+            <Button onAction="#handleAddDocument" maxWidth="Infinity" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 12;" text="➕ Tambah Dokumen"/>
+            <Button onAction="#handleViewDocuments" maxWidth="Infinity" style="-fx-background-color: #8e44ad; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 12;" text="📑 Semua Dokumen"/>
+            <Button onAction="#handleRenewal" maxWidth="Infinity" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 12;" text="🔄 Perpanjangan"/>
+            <Button onAction="#handleNotifications" maxWidth="Infinity" style="-fx-background-color: #16a085; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 12;" text="📧 Notifikasi"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <!-- Tombol User (Hanya Admin) -->
+            <Button onAction="#handleUsers" maxWidth="Infinity" style="-fx-background-color: #34495e; -fx-text-fill: white; -fx-cursor: hand; -fx-padding: 12;" text="👥 Manajemen User"/>
+        </VBox>
+    </left>
+
+    <!-- KONTEN TENGAH -->
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-width: 0;">
+            <VBox spacing="20" style="-fx-padding: 20;">
+
+                <!-- Statistik Card (4 Cards Lengkap) -->
+                <HBox spacing="20">
+                    <!-- Card 1: Total MoU -->
+                    <VBox style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);"
+                          prefWidth="200" minHeight="150" alignment="CENTER">
+                        <Label fx:id="lblTotalMou" style="-fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #2980b9;" text="0"/>
+                        <Label style="-fx-text-fill: #7f8c8d; -fx-font-size: 14px;" text="Total MoU"/>
+                    </VBox>
+
+                    <!-- Card 2: Total PKS -->
+                    <VBox style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);"
+                          prefWidth="200" minHeight="150" alignment="CENTER">
+                        <Label fx:id="lblTotalPks" style="-fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #27ae60;" text="0"/>
+                        <Label style="-fx-text-fill: #7f8c8d; -fx-font-size: 14px;" text="Total PKS"/>
+                    </VBox>
+
+                    <!-- Card 3: Dokumen Aktif -->
+                    <VBox style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);"
+                          prefWidth="200" minHeight="150" alignment="CENTER">
+                        <Label fx:id="lblActive" style="-fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #2ecc71;" text="0"/>
+                        <Label style="-fx-text-fill: #7f8c8d; -fx-font-size: 14px;" text="Dokumen Aktif"/>
+                    </VBox>
+
+                    <!-- Card 4: Kadaluarsa -->
+                    <VBox style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);"
+                          prefWidth="200" minHeight="90" alignment="CENTER">
+                        <Label fx:id="lblExpired" style="-fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;" text="0"/>
+                        <Label style="-fx-text-fill: #7f8c8d; -fx-font-size: 14px;" text="Dokumen Kadaluarsa"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Tabel Data -->
+                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Daftar Dokumen"/>
+
+                <!-- Search & Filter -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <TextField fx:id="txtSearch" prefWidth="300" promptText="🔍 Cari dokumen..." />
+                    <Button onAction="#handleSearch" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand;" text="Cari"/>
+                    <ComboBox fx:id="cbJenis" prefWidth="150" promptText="Semua Jenis" />
+                    <ComboBox fx:id="cbStatus" prefWidth="150" promptText="Semua Status" />
+                </HBox>
+
+                <TableView fx:id="tableDocuments" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colNomor" prefWidth="150" text="Nomor Dokumen"/>
+                        <TableColumn fx:id="colJenis" prefWidth="80" text="Jenis"/>
+                        <TableColumn fx:id="colMitra" prefWidth="200" text="Mitra"/>
+                        <TableColumn fx:id="colTanggal" prefWidth="120" text="Berakhir"/>
+                        <TableColumn fx:id="colStatus" prefWidth="120" text="Status"/>
+                        <TableColumn fx:id="colAksi" prefWidth="100" text="Aksi"/>
+                    </columns>
+                </TableView>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>
