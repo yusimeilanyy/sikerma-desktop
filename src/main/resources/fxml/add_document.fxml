@@ -5,7 +5,7 @@
 <?import javafx.geometry.Insets?>
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.sikerma.sikerma.controller.AddDocumentController"
+      fx:controller="com.sikerma.sikerma.controller.AddPemdaDocumentController"
       style="-fx-background-color: #f8fafc;">
 
     <!-- HEADER -->

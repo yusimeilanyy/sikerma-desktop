@@ -7,7 +7,8 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.sikerma.sikerma.controller.DashboardController"
-            style="-fx-background-color: #ecf0f1;">
+            style="-fx-background-color: #ecf0f1;"
+            stylesheets="@../css/style.css">
 
     <!-- TOP HEADER (User Info & Logout) -->
     <top>
@@ -68,7 +69,7 @@
 
                     <!-- Card 4: Kadaluarsa -->
                     <VBox style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);"
-                          prefWidth="200" minHeight="90" alignment="CENTER">
+                          prefWidth="200" minHeight="150" alignment="CENTER">
                         <Label fx:id="lblExpired" style="-fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;" text="0"/>
                         <Label style="-fx-text-fill: #7f8c8d; -fx-font-size: 14px;" text="Dokumen Kadaluarsa"/>
                     </VBox>
@@ -85,13 +86,16 @@
                     <ComboBox fx:id="cbStatus" prefWidth="150" promptText="Semua Status" />
                 </HBox>
 
-                <TableView fx:id="tableDocuments" VBox.vgrow="ALWAYS">
+                <!-- ✅ TABEL DENGAN KOLOM LENGKAP -->
+                <TableView fx:id="tableDocuments" VBox.vgrow="ALWAYS" styleClass="modern-table">
                     <columns>
+                        <TableColumn fx:id="colNo" prefWidth="50" text="No"/>
+                        <TableColumn fx:id="colJenis" prefWidth="100" text="Jenis" styleClass="badge-column"/>
                         <TableColumn fx:id="colNomor" prefWidth="150" text="Nomor Dokumen"/>
-                        <TableColumn fx:id="colJenis" prefWidth="80" text="Jenis"/>
                         <TableColumn fx:id="colMitra" prefWidth="200" text="Mitra"/>
-                        <TableColumn fx:id="colTanggal" prefWidth="120" text="Berakhir"/>
-                        <TableColumn fx:id="colStatus" prefWidth="120" text="Status"/>
+                        <TableColumn fx:id="colTanggalMulai" prefWidth="120" text="Tanggal Mulai"/>
+                        <TableColumn fx:id="colTanggal" prefWidth="120" text="Tanggal Berakhir"/>
+                        <TableColumn fx:id="colStatus" prefWidth="150" text="Status" styleClass="badge-column"/>
                         <TableColumn fx:id="colAksi" prefWidth="100" text="Aksi"/>
                     </columns>
                 </TableView>

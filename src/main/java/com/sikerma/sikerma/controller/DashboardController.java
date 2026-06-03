@@ -16,19 +16,24 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.LocalDate;
+import java.util.Optional; // ✅ Import untuk ChoiceDialog
 
 public class DashboardController {
 
+    // === VARIABEL LABEL ===
     @FXML private Label lblUserName;
     @FXML private Label lblUserRole;
-    @FXML private Label lblTotalMou;      // ✅ DITAMBAHKAN
-    @FXML private Label lblTotalPks;      // ✅ DITAMBAHKAN
+    @FXML private Label lblTotalMou;
+    @FXML private Label lblTotalPks;
     @FXML private Label lblActive;
     @FXML private Label lblExpired;
+
+    // === VARIABEL FILTER ===
     @FXML private TextField txtSearch;
     @FXML private ComboBox<String> cbJenis;
     @FXML private ComboBox<String> cbStatus;
 
+    // === VARIABEL TABEL ===
     @FXML private TableView<Document> tableDocuments;
     @FXML private TableColumn<Document, String> colNomor;
     @FXML private TableColumn<Document, String> colJenis;
@@ -40,6 +45,7 @@ public class DashboardController {
     private ObservableList<Document> documentList = FXCollections.observableArrayList();
     private int currentUserId;
 
+    // === METHOD UTAMA: Dipanggil setelah login sukses ===
     public void setUserData(int userId, String userName, String role) {
         this.currentUserId = userId;
         lblUserName.setText(userName);
@@ -65,6 +71,7 @@ public class DashboardController {
         colTanggal.setCellValueFactory(new PropertyValueFactory<>("tanggalBerakhir"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
 
+        // Kolom Aksi (Edit & Hapus)
         colAksi.setCellFactory(param -> new TableCell<>() {
             @Override
             protected void updateItem(Void item, boolean empty) {
@@ -116,9 +123,9 @@ public class DashboardController {
                 }
             }
 
-            // ✅ BAGIAN INI YANG DIPERBAIKI (tambah 2 baris pertama):
-            lblTotalMou.setText(String.valueOf(totalMou));   // ✅ TAMBAH INI
-            lblTotalPks.setText(String.valueOf(totalPks));   // ✅ TAMBAH INI
+            // Update Statistik Cards
+            lblTotalMou.setText(String.valueOf(totalMou));
+            lblTotalPks.setText(String.valueOf(totalPks));
             lblActive.setText(String.valueOf(active));
             lblExpired.setText(String.valueOf(expired));
 
@@ -129,51 +136,71 @@ public class DashboardController {
         }
     }
 
+    // === ✅ METHOD BARU: Handle Tambah Dokumen dengan Popup Pilihan ===
     @FXML
     private void handleAddDocument() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/add_document.fxml"));
-            Scene scene = new Scene(loader.load(), 800, 700);
+        // 1. Tampilkan Popup Pilihan Jenis Dokumen
+        ChoiceDialog<String> dialog = new ChoiceDialog<>("Pemerintah Daerah",
+                "Pemerintah Daerah", "Non-Pemerintah Daerah");
+        dialog.setTitle("Pilih Jenis Dokumen");
+        dialog.setHeaderText("Silakan pilih jenis mitra dokumen:");
+        dialog.setContentText("Jenis Mitra:");
 
-            Stage stage = new Stage();
-            stage.setTitle("Tambah Dokumen - SIKERMA");
-            stage.setScene(scene);
+        Optional<String> result = dialog.showAndWait();
 
-            AddDocumentController controller = loader.getController();
-            controller.setCurrentUserId(currentUserId);
+        // 2. Buka Form Sesuai Pilihan User
+        if (result.isPresent()) {
+            try {
+                String jenis = result.get();
 
-            stage.showAndWait();
-            loadDashboardData();
+                // Tentukan file FXML berdasarkan pilihan
+                String fxmlFile;
+                if (jenis.equals("Pemerintah Daerah")) {
+                    fxmlFile = "/fxml/add_pemda_document.fxml"; // Form Pemda
+                } else {
+                    fxmlFile = "/fxml/add_non_pemda_document.fxml"; // Form Non-Pemda
+                }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Error", "Gagal membuka form: " + e.getMessage());
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
+                Stage stage = new Stage();
+                stage.setScene(new Scene(loader.load(), 800, 700));
+                stage.setTitle("Tambah Dokumen - " + jenis);
+
+                // Kirim currentUserId ke Controller yang sesuai
+                Object controller = loader.getController();
+                if (controller instanceof AddPemdaDocumentController) {
+                    ((AddPemdaDocumentController) controller).setCurrentUserId(currentUserId);
+                } else if (controller instanceof AddNonPemdaDocumentController) {
+                    ((AddNonPemdaDocumentController) controller).setCurrentUserId(currentUserId);
+                }
+
+                stage.showAndWait(); // Tunggu form ditutup
+                loadDashboardData(); // Refresh data tabel
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                showAlert("Error", "Gagal membuka form: " + e.getMessage());
+            }
         }
     }
 
-    @FXML
-    private void handleDashboard() { loadDashboardData(); }
+    // === EVENT HANDLER LAINNYA ===
+    @FXML private void handleDashboard() { loadDashboardData(); }
+    @FXML private void handleViewDocuments() { loadDashboardData(); }
 
-    @FXML
-    private void handleViewDocuments() { loadDashboardData(); }
-
-    @FXML
-    private void handleRenewal() {
+    @FXML private void handleRenewal() {
         showAlert("Info", "Fitur perpanjangan akan dibuat...");
     }
 
-    @FXML
-    private void handleNotifications() {
+    @FXML private void handleNotifications() {
         showAlert("Info", "Fitur notifikasi akan dibuat...");
     }
 
-    @FXML
-    private void handleUsers() {
+    @FXML private void handleUsers() {
         showAlert("Info", "Manajemen User (Admin Only)");
     }
 
-    @FXML
-    private void handleSearch() {
+    @FXML private void handleSearch() {
         String keyword = txtSearch.getText().toLowerCase();
         ObservableList<Document> filtered = FXCollections.observableArrayList();
 
@@ -186,8 +213,7 @@ public class DashboardController {
         tableDocuments.setItems(filtered);
     }
 
-    @FXML
-    private void handleLogout() {
+    @FXML private void handleLogout() {
         Stage stage = (Stage) lblUserName.getScene().getWindow();
         stage.close();
     }
