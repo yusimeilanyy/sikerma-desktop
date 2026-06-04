@@ -13,12 +13,15 @@ public class Document {
     private String pic;
     private String filePath;
     private String status;
+    private String keterangan;
     private LocalDate createdAt;
+    private int is_deleted;
+    private int created_by;
 
     // Constructor
     public Document() {}
 
-    // Getters & Setters
+    // === GETTERS & SETTERS ===
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -49,6 +52,15 @@ public class Document {
     public String getFilePath() { return filePath; }
     public void setFilePath(String filePath) { this.filePath = filePath; }
 
+    public String getKeterangan() { return keterangan; }
+    public void setKeterangan(String keterangan) { this.keterangan = keterangan; }
+
     public LocalDate getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDate createdAt) { this.createdAt = createdAt; }
+
+    public int getIs_deleted() { return is_deleted; }
+    public void setIs_deleted(int is_deleted) { this.is_deleted = is_deleted; }
+
+    public int getCreated_by() { return created_by; }
+    public void setCreated_by(int created_by) { this.created_by = created_by; }
 }
