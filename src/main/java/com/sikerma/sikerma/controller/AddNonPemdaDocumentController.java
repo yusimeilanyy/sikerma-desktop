@@ -17,17 +17,11 @@ import java.time.LocalDate;
 
 public class AddNonPemdaDocumentController {
 
-    // === FIELDS FXML ===
     @FXML private ComboBox<String> cbJenisPerjanjian;
-
-    // ✅ Jenis Dokumen (ComboBox + TextField untuk "Lainnya...")
     @FXML private ComboBox<String> cbJenisDokumen;
     @FXML private VBox boxJenisDokumenLainnya;
     @FXML private TextField txtJenisDokumenLainnya;
-
-    // ✅ Tingkat Kerja Sama (INPUT TEXT - BISA DIKETIK)
     @FXML private TextField txtTingkatKerjaSama;
-
     @FXML private ComboBox<String> cbPicBlsdm;
     @FXML private TextField txtNomorDokumenBalai;
     @FXML private TextField txtNomorDokumenMitra;
@@ -49,11 +43,9 @@ public class AddNonPemdaDocumentController {
 
     @FXML
     public void initialize() {
-        // 1. Jenis Perjanjian
         cbJenisPerjanjian.getItems().addAll("MoU (Memorandum of Understanding)", "PKS (Perjanjian Kerja Sama)");
         cbJenisPerjanjian.setValue("MoU (Memorandum of Understanding)");
 
-        // ✅ 2. Jenis Dokumen (Dropdown + Opsi "Lainnya...")
         cbJenisDokumen.getItems().addAll(
                 "Pilih jenis dokumen",
                 "Nota Kesepahaman",
@@ -64,7 +56,6 @@ public class AddNonPemdaDocumentController {
         );
         cbJenisDokumen.setValue("Pilih jenis dokumen");
 
-        // ✅ Event: Tampilkan TextField jika pilih "Lainnya..."
         cbJenisDokumen.setOnAction(e -> {
             String selected = cbJenisDokumen.getValue();
             if ("Lainnya...".equals(selected)) {
@@ -78,21 +69,14 @@ public class AddNonPemdaDocumentController {
             }
         });
 
-        // 3. PIC BLSDM (Contoh Data)
-        cbPicBlsdm.getItems().addAll("Dr. Ahmad Santoso", "Dra. Maria Wowor", "Ir. John Lengkong");
+        cbPicBlsdm.getItems().addAll("Dr. Ahmad Santoso, M.Si", "Dra. Maria Wowor, M.Pd",
+                "Ir. John Lengkong, M.T", "Drs. Sarah Tumangkeng, M.Si");
         cbPicBlsdm.setValue("Pilih PIC BLSDM Komdigi Manado");
 
-        // ✅ 4. Status Lengkap Sesuai Gambar
         cbStatus.getItems().addAll(
-                "Baru",
-                "Dalam Proses",
-                "Review PEMDA 1",
-                "Review BPSDMP Kominfo",
-                "Review BPSDMP 1",
-                "Review PEMDA 2",
-                "Review BPSDMP 2",
-                "Persiapan TTD Para Pihak",
-                "Selesai"
+                "Baru", "Dalam Proses", "Review PEMDA 1", "Review BPSDMP Kominfo",
+                "Review BPSDMP 1", "Review PEMDA 2", "Review BPSDMP 2",
+                "Persiapan TTD Para Pihak", "Selesai"
         );
         cbStatus.setValue("Baru");
     }
@@ -105,28 +89,24 @@ public class AddNonPemdaDocumentController {
                 new FileChooser.ExtensionFilter("PDF Files", "*.pdf"),
                 new FileChooser.ExtensionFilter("Word Files", "*.doc", "*.docx")
         );
-
         selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
             lblFileName.setText(selectedFile.getName());
         }
     }
 
+    // ✅✅✅ METHOD INI DI-UPDATE: Simpan PIC BLSDM ke database ✅✅✅
     @FXML
     private void handleSave() {
-        // Validasi: Tingkat Kerja Sama wajib diisi
         if (txtTingkatKerjaSama.getText().trim().isEmpty()) {
-            showAlert("Validasi", "Tingkat Kerja Sama / Nama Instansi harus diisi!", Alert.AlertType.WARNING);
+            showAlert("Validasi", "Nama Instansi / Tingkat Kerja Sama harus diisi!", Alert.AlertType.WARNING);
             return;
         }
 
         try {
-            String filePath = "";
-            if (selectedFile != null) {
-                filePath = uploadFile(selectedFile);
-            }
+            String filePath = selectedFile != null ? uploadFile(selectedFile) : "";
 
-            // ✅ Tentukan nilai Jenis Dokumen (dari combo atau textfield)
+            // ✅ Ambil Jenis Dokumen
             String jenisDokumenValue = cbJenisDokumen.getValue();
             if ("Lainnya...".equals(jenisDokumenValue)) {
                 jenisDokumenValue = txtJenisDokumenLainnya.getText().trim();
@@ -136,9 +116,31 @@ public class AddNonPemdaDocumentController {
                 }
             }
 
-            // Simpan ke Database
-            String sql = "INSERT INTO documents (nomor_dokumen, jenis, mitra, kategori, tanggal_mulai, " +
-                    "tanggal_berakhir, pic, file_path, status, keterangan, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            // ✅ SINGKAT JENIS PERJANJIAN: MoU atau PKS saja
+            String jenisPerjanjian = cbJenisPerjanjian.getValue();
+            if (jenisPerjanjian != null) {
+                if (jenisPerjanjian.contains("MoU")) {
+                    jenisPerjanjian = "MoU";
+                } else if (jenisPerjanjian.contains("PKS")) {
+                    jenisPerjanjian = "PKS";
+                }
+            }
+
+            // ✅ KATEGORI untuk filter tab
+            String kategori = "Non-Pemerintah";
+
+            // ✅ MITRA = Nama instansi yang diketik user
+            String mitra = txtTingkatKerjaSama.getText().trim();
+
+            // ✅ PIC BLSDM & PIC MITRA (BERBEDA)
+            String picBlsdm = cbPicBlsdm.getValue();  // ✅ PIC BLSDM
+            String picMitra = txtPicMitra.getText().trim();  // ✅ PIC MITRA
+            String kontakPic = txtKontakMitra.getText().trim();  // ✅ KONTAK PIC MITRA
+
+            // ✅ QUERY dengan kolom pic_blsdm dan kontak_pic
+            String sql = "INSERT INTO documents (nomor_dokumen, jenis, mitra, kategori, jenis_dokumen_detail, " +
+                    "tanggal_mulai, tanggal_berakhir, pic, kontak_pic, pic_blsdm, file_path, status, keterangan, created_by) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             try (Connection conn = DatabaseConfig.connect();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -147,36 +149,27 @@ public class AddNonPemdaDocumentController {
                 if (nomorDokumen.isEmpty()) nomorDokumen = txtNomorDokumenMitra.getText().trim();
 
                 pstmt.setString(1, nomorDokumen);
-                pstmt.setString(2, cbJenisPerjanjian.getValue());
-
-                // Mitra = Tingkat Kerja Sama (input text)
-                pstmt.setString(3, txtTingkatKerjaSama.getText().trim());
-
-                // ✅ Kategori = Jenis Dokumen (bisa dari dropdown atau input manual)
-                pstmt.setString(4, jenisDokumenValue);
-
-                pstmt.setString(5, dpTanggalMulai.getValue() != null ? dpTanggalMulai.getValue().toString() : "");
-                pstmt.setString(6, dpTanggalBerakhir.getValue() != null ? dpTanggalBerakhir.getValue().toString() : "");
-                pstmt.setString(7, txtPicMitra.getText().trim());
-                pstmt.setString(8, filePath);
-
-                // Simpan Status yang dipilih
-                pstmt.setString(9, cbStatus.getValue());
-
-                pstmt.setString(10, txtCatatan.getText().trim());
-                pstmt.setInt(11, currentUserId);
+                pstmt.setString(2, jenisPerjanjian);
+                pstmt.setString(3, mitra);
+                pstmt.setString(4, kategori);
+                pstmt.setString(5, jenisDokumenValue);
+                pstmt.setString(6, dpTanggalMulai.getValue() != null ? dpTanggalMulai.getValue().toString() : "");
+                pstmt.setString(7, dpTanggalBerakhir.getValue() != null ? dpTanggalBerakhir.getValue().toString() : "");
+                pstmt.setString(8, picMitra);        // ✅ PIC MITRA
+                pstmt.setString(9, kontakPic);        // ✅ KONTAK PIC MITRA
+                pstmt.setString(10, picBlsdm);        // ✅ PIC BLSDM (field baru)
+                pstmt.setString(11, filePath);
+                pstmt.setString(12, cbStatus.getValue());
+                pstmt.setString(13, txtCatatan.getText().trim());
+                pstmt.setInt(14, currentUserId);
 
                 pstmt.executeUpdate();
-
                 showAlert("Sukses!", "Dokumen berhasil disimpan.", Alert.AlertType.INFORMATION);
-
-                Stage stage = (Stage) txtNomorDokumenBalai.getScene().getWindow();
-                stage.close();
+                ((Stage) txtNomorDokumenBalai.getScene().getWindow()).close();
             }
-
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert("Error", "Gagal menyimpan dokumen: " + e.getMessage(), Alert.AlertType.ERROR);
+            showAlert("Error", "Gagal menyimpan: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
@@ -185,38 +178,22 @@ public class AddNonPemdaDocumentController {
             String uploadDir = "uploads/";
             Path uploadPath = Paths.get(uploadDir);
             if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
-
             String fileName = System.currentTimeMillis() + "_" + file.getName();
-            Path targetPath = uploadPath.resolve(fileName);
-            Files.copy(file.toPath(), targetPath);
-
-            return targetPath.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
-        }
+            Files.copy(file.toPath(), uploadPath.resolve(fileName));
+            return uploadPath.resolve(fileName).toString();
+        } catch (Exception e) { return ""; }
     }
 
-    @FXML
-    private void handleBack() {
-        Stage stage = (Stage) txtNomorDokumenBalai.getScene().getWindow();
-        stage.close();
-    }
+    @FXML private void handleBack() { ((Stage) txtNomorDokumenBalai.getScene().getWindow()).close(); }
 
-    @FXML
-    private void handleCancel() {
+    @FXML private void handleCancel() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Batal");
         alert.setContentText("Yakin ingin membatalkan?");
-        alert.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) handleBack();
-        });
+        alert.showAndWait().ifPresent(r -> { if (r == ButtonType.OK) handleBack(); });
     }
 
-    private void showAlert(String title, String message, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setContentText(message);
-        alert.showAndWait();
+    private void showAlert(String t, String m, Alert.AlertType type) {
+        new Alert(type, m, ButtonType.OK).showAndWait();
     }
 }

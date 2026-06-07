@@ -6,11 +6,13 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.sql.Connection;
@@ -54,30 +56,82 @@ public class AllDocumentsController {
 
     private void initializeTable() {
         colJenisPerjanjian.setCellValueFactory(new PropertyValueFactory<>("jenis"));
+
+        // ✅ Tingkat Kerja Sama: HANYA Pemda yang pakai "Pemerintah"
         colTingkatKerjaSama.setCellValueFactory(cellData -> {
             String mitra = cellData.getValue().getMitra();
-            if (mitra != null && mitra.contains("Provinsi")) {
-                return new javafx.beans.property.SimpleStringProperty("Pemerintah Provinsi");
-            } else if (mitra != null && (mitra.contains("Kab.") || mitra.contains("Kota"))) {
-                return new javafx.beans.property.SimpleStringProperty("Pemerintah Kabupaten/Kota");
+            String kategori = cellData.getValue().getKategori();
+
+            if (mitra != null && !mitra.isEmpty()) {
+                // ✅ HANYA untuk Pemda: tambah "Pemerintah" jika belum ada
+                if ("Pemerintah Daerah".equals(kategori)) {
+                    if (!mitra.toLowerCase().startsWith("pemerintah")) {
+                        mitra = "Pemerintah " + mitra;
+                    }
+                    // Ganti "Kab." jadi "Kabupaten"
+                    mitra = mitra.replace("Kab.", "Kabupaten");
+                    mitra = mitra.replace("Kab ", "Kabupaten ");
+                }
+                // ✅ Untuk Non-Pemda: tampil apa adanya (tanpa "Pemerintah")
             }
-            return new javafx.beans.property.SimpleStringProperty("-");
+            return new javafx.beans.property.SimpleStringProperty(mitra != null ? mitra : "-");
         });
-        colJenisDokumen.setCellValueFactory(new PropertyValueFactory<>("kategori"));
-        colPicBpsdmp.setCellValueFactory(new PropertyValueFactory<>("pic"));
-        colPicPemda.setCellValueFactory(cellData -> {
-            String pic = cellData.getValue().getPic();
-            return new javafx.beans.property.SimpleStringProperty(pic != null ? pic : "-");
+
+        colJenisDokumen.setCellValueFactory(new PropertyValueFactory<>("jenisDokumenDetail"));
+
+        // ✅✅✅ PIC BPSDMP: SELALU tampilkan pic_blsdm (untuk Pemda & Non-Pemda) ✅✅✅
+        colPicBpsdmp.setCellValueFactory(cellData -> {
+            Document doc = cellData.getValue();
+            String picBlsdm = doc.getPicBlsdm();
+
+            // ✅ Tampilkan PIC BLSdm untuk SEMUA dokumen
+            return new javafx.beans.property.SimpleStringProperty(
+                    (picBlsdm != null && !picBlsdm.isEmpty()) ? picBlsdm : "-"
+            );
         });
+
+        // ✅ PIC PEMDA/MITRA dengan NAMA & KONTAK vertikal
+        colPicPemda.setCellValueFactory(new PropertyValueFactory<>("pic"));
+        colPicPemda.setCellFactory(column -> new TableCell<Document, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getTableRow() == null || getTableRow().getIndex() >= getTableView().getItems().size()) {
+                    setGraphic(null);
+                } else {
+                    Document doc = getTableView().getItems().get(getTableRow().getIndex());
+
+                    VBox vbox = new VBox(5);
+                    vbox.setAlignment(Pos.CENTER);
+                    vbox.setStyle("-fx-padding: 5 0;");
+
+                    Label lblNama = new Label(doc.getPic() != null ? doc.getPic() : "-");
+                    lblNama.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1e3a8a;");
+                    lblNama.setAlignment(Pos.CENTER);
+
+                    String kontak = doc.getKontakPic() != null ? doc.getKontakPic() : "-";
+                    Label lblKontak = new Label(kontak);
+                    lblKontak.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b;");
+                    lblKontak.setAlignment(Pos.CENTER);
+
+                    vbox.getChildren().addAll(lblNama, lblKontak);
+                    setGraphic(vbox);
+                }
+            }
+        });
+
         colTanggalMulai.setCellValueFactory(cellData -> {
             LocalDate date = cellData.getValue().getTanggalMulai();
             return new javafx.beans.property.SimpleStringProperty(date != null ? date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")) : "-");
         });
+
         colTanggalBerakhir.setCellValueFactory(cellData -> {
             LocalDate date = cellData.getValue().getTanggalBerakhir();
             return new javafx.beans.property.SimpleStringProperty(date != null ? date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")) : "-");
         });
+
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+
         colCatatan.setCellValueFactory(cellData -> {
             String ket = cellData.getValue().getKeterangan();
             return new javafx.beans.property.SimpleStringProperty(ket != null && !ket.isEmpty() ? ket : "-");
@@ -154,12 +208,15 @@ public class AllDocumentsController {
                 doc.setJenis(rs.getString("jenis"));
                 doc.setMitra(rs.getString("mitra"));
                 doc.setKategori(rs.getString("kategori"));
+                doc.setJenisDokumenDetail(rs.getString("jenis_dokumen_detail"));
                 if (rs.getDate("tanggal_mulai") != null)
                     doc.setTanggalMulai(rs.getDate("tanggal_mulai").toLocalDate());
                 if (rs.getDate("tanggal_berakhir") != null)
                     doc.setTanggalBerakhir(rs.getDate("tanggal_berakhir").toLocalDate());
                 doc.setStatus(rs.getString("status"));
                 doc.setPic(rs.getString("pic"));
+                doc.setKontakPic(rs.getString("kontak_pic"));
+                doc.setPicBlsdm(rs.getString("pic_blsdm"));
                 doc.setKeterangan(rs.getString("keterangan"));
                 doc.setFilePath(rs.getString("file_path"));
                 documentList.add(doc);
@@ -174,6 +231,7 @@ public class AllDocumentsController {
         }
     }
 
+    // ✅ HEADER KOLOM DINAMIS: PIC PEMDA / PIC MITRA
     @FXML
     private void showPemdaDocuments() {
         currentFilter = "Pemerintah Daerah";
@@ -181,6 +239,7 @@ public class AllDocumentsController {
         btnNonPemda.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 12 30; -fx-background-radius: 8;");
         lblSectionTitle.setText("Instansi Pemerintah Daerah");
         lblSectionDesc.setText("Pengelolaan dokumen kerja sama dengan Pemerintah Daerah beserta perangkat daerah");
+        colPicPemda.setText("PIC PEMDA"); // ✅ Header untuk Pemda
         loadDocuments();
     }
 
@@ -191,6 +250,7 @@ public class AllDocumentsController {
         btnPemda.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 12 30; -fx-background-radius: 8;");
         lblSectionTitle.setText("Instansi Non-Pemerintah Daerah");
         lblSectionDesc.setText("Pengelolaan dokumen kerja sama dengan Instansi Non-Pemerintah Daerah");
+        colPicPemda.setText("PIC MITRA"); // ✅ Header untuk Non-Pemda
         loadDocuments();
     }
 
@@ -227,7 +287,6 @@ public class AllDocumentsController {
         }
     }
 
-    // ✅ METHOD BARU: Kembali ke Dashboard
     @FXML
     private void handleBack() {
         Stage stage = (Stage) ((Node) btnPemda).getScene().getWindow();

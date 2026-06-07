@@ -42,8 +42,6 @@ public class AddPemdaDocumentController {
 
     private File selectedFile;
     private int currentUserId;
-
-    // Data Kabupaten/Kota per Provinsi
     private final Map<String, String[]> kabKotaData = new HashMap<>();
 
     public void setCurrentUserId(int userId) {
@@ -52,16 +50,13 @@ public class AddPemdaDocumentController {
 
     @FXML
     public void initialize() {
-        // Inisialisasi Data Kabupaten/Kota
         initKabKotaData();
 
-        // Isi ComboBox
         cbJenisPerjanjian.getItems().addAll("MoU (Memorandum of Understanding)", "PKS (Perjanjian Kerja Sama)");
         cbJenisPerjanjian.setValue("MoU (Memorandum of Understanding)");
 
         cbTingkatKerjaSama.getItems().addAll("Pemerintah Provinsi", "Pemerintah Kabupaten/Kota");
 
-        // ✅ JENIS DOKUMEN DENGAN OPSI BARU
         cbJenisDokumen.getItems().addAll(
                 "Pilih jenis dokumen",
                 "Nota Kesepahaman",
@@ -72,7 +67,6 @@ public class AddPemdaDocumentController {
         );
         cbJenisDokumen.setValue("Pilih jenis dokumen");
 
-        // ✅ EVENT: Tampilkan TextField jika pilih "Lainnya..."
         cbJenisDokumen.setOnAction(e -> {
             String selected = cbJenisDokumen.getValue();
             if ("Lainnya...".equals(selected)) {
@@ -89,114 +83,83 @@ public class AddPemdaDocumentController {
         cbPicBlsdm.getItems().addAll("Dr. Ahmad Santoso, M.Si", "Dra. Maria Wowor, M.Pd",
                 "Ir. John Lengkong, M.T", "Drs. Sarah Tumangkeng, M.Si");
 
-        // ✅ STATUS LENGKAP SESUAI GAMBAR
         cbStatus.getItems().addAll(
-                "Baru",
-                "Dalam Proses",
-                "Review PEMDA 1",
-                "Review BPSDMP Kominfo",
-                "Review BPSDMP 1",
-                "Review PEMDA 2",
-                "Review BPSDMP 2",
-                "Persiapan TTD Para Pihak",
-                "Selesai"
+                "Baru", "Dalam Proses", "Review PEMDA 1", "Review BPSDMP Kominfo",
+                "Review BPSDMP 1", "Review PEMDA 2", "Review BPSDMP 2",
+                "Persiapan TTD Para Pihak", "Selesai"
         );
         cbStatus.setValue("Baru");
 
-        // Provinsi
         cbProvinsi.getItems().addAll("Sulawesi Utara", "Gorontalo", "Sulawesi Tengah", "Maluku Utara");
 
-        // Event Listener untuk Tingkat Kerja Sama
         cbTingkatKerjaSama.setOnAction(e -> handleTingkatChange());
-
-        // Event Listener untuk Provinsi (update Kab/Kota)
         cbProvinsi.setOnAction(e -> handleProvinsiChange());
     }
 
     private void initKabKotaData() {
-        // Sulawesi Utara
         kabKotaData.put("Sulawesi Utara", new String[]{
-                "Kab. Bolaang Mongondow", "Kab. Minahasa", "Kab. Kepulauan Sangihe",
-                "Kab. Kepulauan Talaud", "Kab. Minahasa Selatan", "Kab. Minahasa Utara",
-                "Kab. Bolaang Mongondow Utara", "Kab. Kepulauan Siau Tagulandang Biaro",
-                "Kab. Minahasa Tenggara", "Kab. Bolaang Mongondow Timur", "Kab. Bolaang Mongondow Selatan",
+                "Kabupaten Bolaang Mongondow", "Kabupaten Minahasa", "Kabupaten Kepulauan Sangihe",
+                "Kabupaten Kepulauan Talaud", "Kabupaten Minahasa Selatan", "Kabupaten Minahasa Utara",
+                "Kabupaten Bolaang Mongondow Utara", "Kabupaten Kepulauan Siau Tagulandang Biaro",
+                "Kabupaten Minahasa Tenggara", "Kabupaten Bolaang Mongondow Timur", "Kabupaten Bolaang Mongondow Selatan",
                 "Kota Manado", "Kota Bitung", "Kota Tomohon", "Kota Kotamobagu"
         });
-
-        // Gorontalo
         kabKotaData.put("Gorontalo", new String[]{
-                "Kab. Gorontalo", "Kab. Boalemo", "Kab. Pohuwato", "Kab. Bone Bolango", "Kab. Gorontalo Utara",
+                "Kabupaten Gorontalo", "Kabupaten Boalemo", "Kabupaten Pohuwato", "Kabupaten Bone Bolango", "Kabupaten Gorontalo Utara",
                 "Kota Gorontalo"
         });
-
-        // Sulawesi Tengah
         kabKotaData.put("Sulawesi Tengah", new String[]{
-                "Kab. Banggai", "Kab. Buol", "Kab. Donggala", "Kab. Morowali", "Kab. Parigi Moutong",
-                "Kab. Poso", "Kab. Sigi", "Kab. Tojo Una-Una", "Kab. Toli-Toli", "Kab. Banggai Kepulauan",
-                "Kab. Banggai Laut", "Kab. Morowali Utara",
-                "Kota Palu"
+                "Kabupaten Banggai", "Kabupaten Buol", "Kabupaten Donggala", "Kabupaten Morowali", "Kabupaten Parigi Moutong",
+                "Kabupaten Poso", "Kabupaten Sigi", "Kabupaten Tojo Una-Una", "Kabupaten Toli-Toli", "Kabupaten Banggai Kepulauan",
+                "Kabupaten Banggai Laut", "Kabupaten Morowali Utara", "Kota Palu"
         });
-
-        // Maluku Utara
         kabKotaData.put("Maluku Utara", new String[]{
-                "Kab. Halmahera Barat", "Kab. Halmahera Tengah", "Kab. Halmahera Utara",
-                "Kab. Halmahera Selatan", "Kab. Kepulauan Sula", "Kab. Halmahera Timur",
-                "Kab. Pulau Morotai", "Kab. Pulau Taliabu",
+                "Kabupaten Halmahera Barat", "Kabupaten Halmahera Tengah", "Kabupaten Halmahera Utara",
+                "Kabupaten Halmahera Selatan", "Kabupaten Kepulauan Sula", "Kabupaten Halmahera Timur",
+                "Kabupaten Pulau Morotai", "Kabupaten Pulau Taliabu",
                 "Kota Ternate", "Kota Tidore Kepulauan"
         });
     }
 
     private void handleTingkatChange() {
         String tingkat = cbTingkatKerjaSama.getValue();
-
         if ("Pemerintah Provinsi".equals(tingkat)) {
-            // Tampilkan Provinsi, sembunyikan Kab/Kota
-            boxProvinsi.setVisible(true);
-            boxProvinsi.setManaged(true);
-            boxKabKota.setVisible(false);
-            boxKabKota.setManaged(false);
+            boxProvinsi.setVisible(true); boxProvinsi.setManaged(true);
+            boxKabKota.setVisible(false); boxKabKota.setManaged(false);
             cbKabKota.setValue(null);
         } else if ("Pemerintah Kabupaten/Kota".equals(tingkat)) {
-            // Tampilkan Provinsi dan Kab/Kota
-            boxProvinsi.setVisible(true);
-            boxProvinsi.setManaged(true);
-            boxKabKota.setVisible(true);
-            boxKabKota.setManaged(true);
+            boxProvinsi.setVisible(true); boxProvinsi.setManaged(true);
+            boxKabKota.setVisible(true); boxKabKota.setManaged(true);
         } else {
-            // Sembunyikan keduanya
-            boxProvinsi.setVisible(false);
-            boxProvinsi.setManaged(false);
-            boxKabKota.setVisible(false);
-            boxKabKota.setManaged(false);
+            boxProvinsi.setVisible(false); boxProvinsi.setManaged(false);
+            boxKabKota.setVisible(false); boxKabKota.setManaged(false);
         }
     }
 
     private void handleProvinsiChange() {
         String provinsi = cbProvinsi.getValue();
         if (provinsi != null && cbKabKota != null) {
-            String[] kabKotaList = kabKotaData.get(provinsi);
-            if (kabKotaList != null) {
+            String[] list = kabKotaData.get(provinsi);
+            if (list != null) {
                 cbKabKota.getItems().clear();
-                cbKabKota.getItems().addAll(kabKotaList);
+                cbKabKota.getItems().addAll(list);
             }
         }
     }
 
     @FXML
     private void handleChooseFile() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Pilih File Dokumen");
-        fileChooser.getExtensionFilters().addAll(
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Pilih File Dokumen");
+        fc.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("PDF Files", "*.pdf"),
                 new FileChooser.ExtensionFilter("Word Files", "*.doc", "*.docx")
         );
-
-        selectedFile = fileChooser.showOpenDialog(null);
-        if (selectedFile != null) {
-            lblFileName.setText(selectedFile.getName());
-        }
+        selectedFile = fc.showOpenDialog(null);
+        if (selectedFile != null) lblFileName.setText(selectedFile.getName());
     }
 
+    // ✅✅✅ METHOD INI DI-UPDATE: Simpan KONTAK PIC ✅✅✅
     @FXML
     private void handleSave() {
         if (cbJenisPerjanjian.getValue() == null) {
@@ -207,7 +170,7 @@ public class AddPemdaDocumentController {
         try {
             String filePath = selectedFile != null ? uploadFile(selectedFile) : "";
 
-            // ✅ TENTUKAN JENIS DOKUMEN (dari combo atau textfield)
+            // ✅ Ambil Jenis Dokumen
             String jenisDokumenValue = cbJenisDokumen.getValue();
             if ("Lainnya...".equals(jenisDokumenValue)) {
                 jenisDokumenValue = txtJenisDokumenLainnya.getText().trim();
@@ -217,18 +180,37 @@ public class AddPemdaDocumentController {
                 }
             }
 
-            String status = cbStatus.getValue();
-
-            // Tentukan mitra berdasarkan tingkat
-            String mitra = "";
-            if ("Pemerintah Provinsi".equals(cbTingkatKerjaSama.getValue())) {
-                mitra = "Provinsi " + cbProvinsi.getValue();
-            } else if ("Pemerintah Kabupaten/Kota".equals(cbTingkatKerjaSama.getValue())) {
-                mitra = cbKabKota.getValue() + ", " + cbProvinsi.getValue();
+            // ✅ SINGKAT JENIS PERJANJIAN: MoU atau PKS saja
+            String jenisPerjanjian = cbJenisPerjanjian.getValue();
+            if (jenisPerjanjian != null) {
+                if (jenisPerjanjian.contains("MoU")) {
+                    jenisPerjanjian = "MoU";
+                } else if (jenisPerjanjian.contains("PKS")) {
+                    jenisPerjanjian = "PKS";
+                }
             }
 
-            String sql = "INSERT INTO documents (nomor_dokumen, jenis, mitra, kategori, tanggal_mulai, " +
-                    "tanggal_berakhir, pic, file_path, status, keterangan, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            // ✅ FORMAT MITRA LENGKAP sesuai pilihan user
+            String mitra = "";
+            String tingkat = cbTingkatKerjaSama.getValue();
+            if ("Pemerintah Provinsi".equals(tingkat)) {
+                mitra = "Pemerintah Provinsi " + cbProvinsi.getValue();
+            } else if ("Pemerintah Kabupaten/Kota".equals(tingkat)) {
+                mitra = cbKabKota.getValue();
+            }
+
+            // ✅ KATEGORI untuk filter tab
+            String kategori = "Pemerintah Daerah";
+
+            // ✅ PIC & KONTAK
+            String picBlsdm = cbPicBlsdm.getValue();
+            String picPemda = txtPicPemda.getText().trim();
+            String kontakPic = txtKontakPemda.getText().trim(); // ✅ KONTAK PIC
+
+            // ✅ QUERY dengan kolom kontak_pic
+            String sql = "INSERT INTO documents (nomor_dokumen, jenis, mitra, kategori, jenis_dokumen_detail, " +
+                    "tanggal_mulai, tanggal_berakhir, pic, kontak_pic, pic_blsdm, file_path, status, keterangan, created_by) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             try (Connection conn = DatabaseConfig.connect();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -237,16 +219,19 @@ public class AddPemdaDocumentController {
                 if (nomorDokumen.isEmpty()) nomorDokumen = txtNomorDokumenPemda.getText().trim();
 
                 pstmt.setString(1, nomorDokumen);
-                pstmt.setString(2, cbJenisPerjanjian.getValue());
+                pstmt.setString(2, jenisPerjanjian);
                 pstmt.setString(3, mitra);
-                pstmt.setString(4, jenisDokumenValue); // ✅ Simpan jenis dokumen
-                pstmt.setString(5, dpTanggalMulai.getValue() != null ? dpTanggalMulai.getValue().toString() : "");
-                pstmt.setString(6, dpTanggalBerakhir.getValue() != null ? dpTanggalBerakhir.getValue().toString() : "");
-                pstmt.setString(7, txtPicPemda.getText().trim());
-                pstmt.setString(8, filePath);
-                pstmt.setString(9, status); // ✅ Simpan status yang dipilih
-                pstmt.setString(10, txtCatatan.getText().trim());
-                pstmt.setInt(11, currentUserId);
+                pstmt.setString(4, kategori);
+                pstmt.setString(5, jenisDokumenValue);
+                pstmt.setString(6, dpTanggalMulai.getValue() != null ? dpTanggalMulai.getValue().toString() : "");
+                pstmt.setString(7, dpTanggalBerakhir.getValue() != null ? dpTanggalBerakhir.getValue().toString() : "");
+                pstmt.setString(8, picPemda);        // PIC PEMDA
+                pstmt.setString(9, kontakPic);        // ✅ KONTAK PIC
+                pstmt.setString(10, picBlsdm);        // PIC BLSdm
+                pstmt.setString(11, filePath);
+                pstmt.setString(12, cbStatus.getValue());
+                pstmt.setString(13, txtCatatan.getText().trim());
+                pstmt.setInt(14, currentUserId);
 
                 pstmt.executeUpdate();
                 showAlert("Sukses!", "Dokumen berhasil disimpan.", Alert.AlertType.INFORMATION);
@@ -267,11 +252,6 @@ public class AddPemdaDocumentController {
             Files.copy(file.toPath(), uploadPath.resolve(fileName));
             return uploadPath.resolve(fileName).toString();
         } catch (Exception e) { return ""; }
-    }
-
-    private String determineStatus(LocalDate end) {
-        if (end == null) return "Aktif";
-        return end.isBefore(LocalDate.now()) ? "Kadaluarsa" : "Aktif";
     }
 
     @FXML private void handleBack() { ((Stage) txtNomorDokumenBalai.getScene().getWindow()).close(); }
