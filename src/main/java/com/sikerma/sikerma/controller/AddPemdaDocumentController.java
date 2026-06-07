@@ -1,263 +1,357 @@
 package com.sikerma.sikerma.controller;
 
 import com.sikerma.sikerma.config.DatabaseConfig;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
 public class AddPemdaDocumentController {
 
     @FXML private ComboBox<String> cbJenisPerjanjian;
     @FXML private ComboBox<String> cbTingkatKerjaSama;
-    @FXML private VBox boxProvinsi;
-    @FXML private ComboBox<String> cbProvinsi;
-    @FXML private VBox boxKabKota;
-    @FXML private ComboBox<String> cbKabKota;
     @FXML private ComboBox<String> cbJenisDokumen;
-    @FXML private VBox boxJenisDokumenLainnya;
-    @FXML private TextField txtJenisDokumenLainnya;
-    @FXML private ComboBox<String> cbPicBlsdm;
+    @FXML private ComboBox<String> cbPICBlsdm;
     @FXML private TextField txtNomorDokumenBalai;
     @FXML private TextField txtNomorDokumenPemda;
-    @FXML private TextField txtPicPemda;
-    @FXML private TextField txtKontakPemda;
+    @FXML private TextField txtPICPemda;
+    @FXML private TextField txtKontakPIC;
     @FXML private TextField txtPemilik;
     @FXML private ComboBox<String> cbStatus;
     @FXML private DatePicker dpTanggalMulai;
     @FXML private DatePicker dpTanggalBerakhir;
     @FXML private TextArea txtCatatan;
-    @FXML private Label lblFileName;
 
-    private File selectedFile;
+    // Field conditional
+    @FXML private Label lblProvinsi;
+    @FXML private VBox boxProvinsi;
+    @FXML private ComboBox<String> cbProvinsi;
+    @FXML private Label lblKabKota;
+    @FXML private VBox boxKabKota;
+    @FXML private ComboBox<String> cbKabKota;
+    @FXML private Label lblJenisDokumenLainnya;
+    @FXML private VBox boxJenisDokumenLainnya;
+    @FXML private TextField txtJenisDokumenLainnya;
+
     private int currentUserId;
-    private final Map<String, String[]> kabKotaData = new HashMap<>();
+    private File selectedFile;
+    private DashboardController dashboardController;
+
+    private ObservableList<String> kabSulut = FXCollections.observableArrayList(
+            "Kab. Minahasa", "Kab. Minahasa Selatan", "Kab. Minahasa Utara",
+            "Kab. Minahasa Tenggara", "Kota Manado", "Kota Bitung",
+            "Kota Tomohon", "Kota Kotamobagu"
+    );
+
+    private ObservableList<String> kabGorontalo = FXCollections.observableArrayList(
+            "Kab. Gorontalo", "Kab. Gorontalo Utara", "Kab. Bone Bolango",
+            "Kab. Pohuwato", "Kab. Boalemo", "Kota Gorontalo"
+    );
+
+    private ObservableList<String> kabSulteng = FXCollections.observableArrayList(
+            "Kab. Donggala", "Kab. Toli-Toli", "Kab. Buol",
+            "Kab. Morowali", "Kab. Banggai", "Kab. Parigi Moutong",
+            "Kab. Tojo Una-Una", "Kab. Sigi", "Kab. Banggai Kepulauan",
+            "Kab. Banggai Laut", "Kab. Morowali Utara", "Kota Palu"
+    );
+
+    private ObservableList<String> kabMalut = FXCollections.observableArrayList(
+            "Kab. Halmahera Barat", "Kab. Halmahera Tengah", "Kab. Halmahera Utara",
+            "Kab. Halmahera Selatan", "Kab. Kepulauan Sula", "Kab. Halmahera Timur",
+            "Kab. Pulau Morotai", "Kab. Pulau Taliabu", "Kota Ternate", "Kota Tidore Kepulauan"
+    );
 
     public void setCurrentUserId(int userId) {
         this.currentUserId = userId;
     }
 
+    public void setDashboardController(DashboardController controller) {
+        this.dashboardController = controller;
+    }
+
     @FXML
     public void initialize() {
-        initKabKotaData();
+        initializeComboBoxes();
+        setupEventHandlers();
+    }
 
-        cbJenisPerjanjian.getItems().addAll("MoU (Memorandum of Understanding)", "PKS (Perjanjian Kerja Sama)");
-        cbJenisPerjanjian.setValue("MoU (Memorandum of Understanding)");
+    private void initializeComboBoxes() {
+        cbJenisPerjanjian.getItems().addAll(
+                "MoU (Memorandum of Understanding)",
+                "PKS (Perjanjian Kerja Sama)"
+        );
 
-        cbTingkatKerjaSama.getItems().addAll("Pemerintah Provinsi", "Pemerintah Kabupaten/Kota");
+        cbTingkatKerjaSama.getItems().addAll(
+                "Pemerintah Provinsi",
+                "Pemerintah Kabupaten/Kota"
+        );
+
+        cbProvinsi.getItems().addAll(
+                "Sulawesi Utara",
+                "Gorontalo",
+                "Sulawesi Tengah",
+                "Maluku Utara"
+        );
 
         cbJenisDokumen.getItems().addAll(
-                "Pilih jenis dokumen",
                 "Nota Kesepahaman",
-                "Perjanjian Kerjasama",
-                "Surat Pernyataan",
                 "Nota Kesepakatan",
+                "Surat Pernyataan",
+                "Perjanjian Kerjasama",
                 "Lainnya..."
         );
-        cbJenisDokumen.setValue("Pilih jenis dokumen");
 
+        cbPICBlsdm.getItems().addAll(
+                "Pilih PIC",
+                "Dra. Maria Wowor, M.Pd",
+                "Drs. Sarah Tumangkeng, M.Si"
+        );
+        cbPICBlsdm.setValue("Pilih PIC");
+
+        cbStatus.getItems().addAll(
+                "Baru",
+                "Dalam Proses",
+                "Review BPSDMP 1",
+                "Review BPSDMP Kominfo",
+                "Review BPSDMP 2",
+                "Review PEMDA 1",
+                "Review PEMDA 2",
+                "Persiapan TTD Para Pihak",
+                "Selesai"
+        );
+        cbStatus.setValue("Baru");
+    }
+
+    private void setupEventHandlers() {
+        // Sembunyikan semua field conditional di awal
+        hideConditionalFields();
+
+        // Handle Tingkat Kerja Sama
+        cbTingkatKerjaSama.setOnAction(e -> {
+            String selected = cbTingkatKerjaSama.getValue();
+
+            // Reset dulu
+            hideConditionalFields();
+            cbProvinsi.setValue(null);
+            cbKabKota.setValue(null);
+            cbKabKota.getItems().clear();
+
+            if (selected != null) {
+                if ("Pemerintah Provinsi".equals(selected)) {
+                    // Tampilkan hanya Provinsi
+                    lblProvinsi.setVisible(true);
+                    lblProvinsi.setManaged(true);
+                    boxProvinsi.setVisible(true);
+                    boxProvinsi.setManaged(true);
+                } else if ("Pemerintah Kabupaten/Kota".equals(selected)) {
+                    // Tampilkan Provinsi DAN Kabupaten/Kota
+                    lblProvinsi.setVisible(true);
+                    lblProvinsi.setManaged(true);
+                    boxProvinsi.setVisible(true);
+                    boxProvinsi.setManaged(true);
+                    lblKabKota.setVisible(true);
+                    lblKabKota.setManaged(true);
+                    boxKabKota.setVisible(true);
+                    boxKabKota.setManaged(true);
+                }
+            }
+        });
+
+        // Handle Provinsi - update Kabupaten/Kota
+        cbProvinsi.setOnAction(e -> {
+            String provinsi = cbProvinsi.getValue();
+            if (provinsi != null && boxKabKota.isVisible()) {
+                cbKabKota.getItems().clear();
+                switch (provinsi) {
+                    case "Sulawesi Utara":
+                        cbKabKota.setItems(kabSulut);
+                        break;
+                    case "Gorontalo":
+                        cbKabKota.setItems(kabGorontalo);
+                        break;
+                    case "Sulawesi Tengah":
+                        cbKabKota.setItems(kabSulteng);
+                        break;
+                    case "Maluku Utara":
+                        cbKabKota.setItems(kabMalut);
+                        break;
+                }
+            }
+        });
+
+        // Handle Jenis Dokumen - show/hide text field
         cbJenisDokumen.setOnAction(e -> {
             String selected = cbJenisDokumen.getValue();
             if ("Lainnya...".equals(selected)) {
+                lblJenisDokumenLainnya.setVisible(true);
+                lblJenisDokumenLainnya.setManaged(true);
                 boxJenisDokumenLainnya.setVisible(true);
                 boxJenisDokumenLainnya.setManaged(true);
                 txtJenisDokumenLainnya.requestFocus();
             } else {
+                lblJenisDokumenLainnya.setVisible(false);
+                lblJenisDokumenLainnya.setManaged(false);
                 boxJenisDokumenLainnya.setVisible(false);
                 boxJenisDokumenLainnya.setManaged(false);
                 txtJenisDokumenLainnya.setText("");
             }
         });
-
-        cbPicBlsdm.getItems().addAll("Dr. Ahmad Santoso, M.Si", "Dra. Maria Wowor, M.Pd",
-                "Ir. John Lengkong, M.T", "Drs. Sarah Tumangkeng, M.Si");
-
-        cbStatus.getItems().addAll(
-                "Baru", "Dalam Proses", "Review PEMDA 1", "Review BPSDMP Kominfo",
-                "Review BPSDMP 1", "Review PEMDA 2", "Review BPSDMP 2",
-                "Persiapan TTD Para Pihak", "Selesai"
-        );
-        cbStatus.setValue("Baru");
-
-        cbProvinsi.getItems().addAll("Sulawesi Utara", "Gorontalo", "Sulawesi Tengah", "Maluku Utara");
-
-        cbTingkatKerjaSama.setOnAction(e -> handleTingkatChange());
-        cbProvinsi.setOnAction(e -> handleProvinsiChange());
     }
 
-    private void initKabKotaData() {
-        kabKotaData.put("Sulawesi Utara", new String[]{
-                "Kabupaten Bolaang Mongondow", "Kabupaten Minahasa", "Kabupaten Kepulauan Sangihe",
-                "Kabupaten Kepulauan Talaud", "Kabupaten Minahasa Selatan", "Kabupaten Minahasa Utara",
-                "Kabupaten Bolaang Mongondow Utara", "Kabupaten Kepulauan Siau Tagulandang Biaro",
-                "Kabupaten Minahasa Tenggara", "Kabupaten Bolaang Mongondow Timur", "Kabupaten Bolaang Mongondow Selatan",
-                "Kota Manado", "Kota Bitung", "Kota Tomohon", "Kota Kotamobagu"
-        });
-        kabKotaData.put("Gorontalo", new String[]{
-                "Kabupaten Gorontalo", "Kabupaten Boalemo", "Kabupaten Pohuwato", "Kabupaten Bone Bolango", "Kabupaten Gorontalo Utara",
-                "Kota Gorontalo"
-        });
-        kabKotaData.put("Sulawesi Tengah", new String[]{
-                "Kabupaten Banggai", "Kabupaten Buol", "Kabupaten Donggala", "Kabupaten Morowali", "Kabupaten Parigi Moutong",
-                "Kabupaten Poso", "Kabupaten Sigi", "Kabupaten Tojo Una-Una", "Kabupaten Toli-Toli", "Kabupaten Banggai Kepulauan",
-                "Kabupaten Banggai Laut", "Kabupaten Morowali Utara", "Kota Palu"
-        });
-        kabKotaData.put("Maluku Utara", new String[]{
-                "Kabupaten Halmahera Barat", "Kabupaten Halmahera Tengah", "Kabupaten Halmahera Utara",
-                "Kabupaten Halmahera Selatan", "Kabupaten Kepulauan Sula", "Kabupaten Halmahera Timur",
-                "Kabupaten Pulau Morotai", "Kabupaten Pulau Taliabu",
-                "Kota Ternate", "Kota Tidore Kepulauan"
-        });
-    }
+    private void hideConditionalFields() {
+        // Sembunyikan Provinsi
+        lblProvinsi.setVisible(false);
+        lblProvinsi.setManaged(false);
+        boxProvinsi.setVisible(false);
+        boxProvinsi.setManaged(false);
 
-    private void handleTingkatChange() {
-        String tingkat = cbTingkatKerjaSama.getValue();
-        if ("Pemerintah Provinsi".equals(tingkat)) {
-            boxProvinsi.setVisible(true); boxProvinsi.setManaged(true);
-            boxKabKota.setVisible(false); boxKabKota.setManaged(false);
-            cbKabKota.setValue(null);
-        } else if ("Pemerintah Kabupaten/Kota".equals(tingkat)) {
-            boxProvinsi.setVisible(true); boxProvinsi.setManaged(true);
-            boxKabKota.setVisible(true); boxKabKota.setManaged(true);
-        } else {
-            boxProvinsi.setVisible(false); boxProvinsi.setManaged(false);
-            boxKabKota.setVisible(false); boxKabKota.setManaged(false);
-        }
-    }
+        // Sembunyikan Kabupaten/Kota
+        lblKabKota.setVisible(false);
+        lblKabKota.setManaged(false);
+        boxKabKota.setVisible(false);
+        boxKabKota.setManaged(false);
 
-    private void handleProvinsiChange() {
-        String provinsi = cbProvinsi.getValue();
-        if (provinsi != null && cbKabKota != null) {
-            String[] list = kabKotaData.get(provinsi);
-            if (list != null) {
-                cbKabKota.getItems().clear();
-                cbKabKota.getItems().addAll(list);
-            }
-        }
+        // Sembunyikan Jenis Dokumen Lainnya
+        lblJenisDokumenLainnya.setVisible(false);
+        lblJenisDokumenLainnya.setManaged(false);
+        boxJenisDokumenLainnya.setVisible(false);
+        boxJenisDokumenLainnya.setManaged(false);
     }
 
     @FXML
-    private void handleChooseFile() {
-        FileChooser fc = new FileChooser();
-        fc.setTitle("Pilih File Dokumen");
-        fc.getExtensionFilters().addAll(
+    private void handleUploadFile() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Pilih Dokumen");
+        fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("PDF Files", "*.pdf"),
-                new FileChooser.ExtensionFilter("Word Files", "*.doc", "*.docx")
+                new FileChooser.ExtensionFilter("Word Documents", "*.doc", "*.docx")
         );
-        selectedFile = fc.showOpenDialog(null);
-        if (selectedFile != null) lblFileName.setText(selectedFile.getName());
+
+        File file = fileChooser.showOpenDialog(null);
+        if (file != null) {
+            selectedFile = file;
+            showAlert("Info", "File dipilih: " + file.getName());
+        }
     }
 
-    // ✅✅✅ METHOD INI DI-UPDATE: Simpan KONTAK PIC ✅✅✅
     @FXML
-    private void handleSave() {
-        if (cbJenisPerjanjian.getValue() == null) {
-            showAlert("Validasi", "Jenis perjanjian harus dipilih!", Alert.AlertType.WARNING);
-            return;
+    private void handleBatal() {
+        if (dashboardController != null) {
+            dashboardController.handleDashboard();
         }
+    }
 
-        try {
-            String filePath = selectedFile != null ? uploadFile(selectedFile) : "";
-
-            // ✅ Ambil Jenis Dokumen
-            String jenisDokumenValue = cbJenisDokumen.getValue();
-            if ("Lainnya...".equals(jenisDokumenValue)) {
-                jenisDokumenValue = txtJenisDokumenLainnya.getText().trim();
-                if (jenisDokumenValue.isEmpty()) {
-                    showAlert("Validasi", "Jenis dokumen harus diisi!", Alert.AlertType.WARNING);
-                    return;
+    @FXML
+    private void handleSimpanDokumen() {
+        if (validateForm()) {
+            try {
+                String mitra = "";
+                if ("Pemerintah Provinsi".equals(cbTingkatKerjaSama.getValue())) {
+                    mitra = "Pemerintah Provinsi " + cbProvinsi.getValue();
+                } else if ("Pemerintah Kabupaten/Kota".equals(cbTingkatKerjaSama.getValue())) {
+                    mitra = cbKabKota.getValue();
                 }
-            }
 
-            // ✅ SINGKAT JENIS PERJANJIAN: MoU atau PKS saja
-            String jenisPerjanjian = cbJenisPerjanjian.getValue();
-            if (jenisPerjanjian != null) {
-                if (jenisPerjanjian.contains("MoU")) {
-                    jenisPerjanjian = "MoU";
-                } else if (jenisPerjanjian.contains("PKS")) {
-                    jenisPerjanjian = "PKS";
+                String jenisDokumen = cbJenisDokumen.getValue();
+                if ("Lainnya...".equals(jenisDokumen)) {
+                    jenisDokumen = txtJenisDokumenLainnya.getText().trim();
                 }
-            }
 
-            // ✅ FORMAT MITRA LENGKAP sesuai pilihan user
-            String mitra = "";
-            String tingkat = cbTingkatKerjaSama.getValue();
-            if ("Pemerintah Provinsi".equals(tingkat)) {
-                mitra = "Pemerintah Provinsi " + cbProvinsi.getValue();
-            } else if ("Pemerintah Kabupaten/Kota".equals(tingkat)) {
-                mitra = cbKabKota.getValue();
-            }
+                String sql = "INSERT INTO documents (jenis, mitra, kategori, jenis_dokumen_detail, " +
+                        "pic_blsdm, nomor_dokumen, tanggal_mulai, tanggal_berakhir, status, " +
+                        "pic, kontak_pic, keterangan, created_at) " +
+                        "VALUES (?, ?, 'Pemerintah Daerah', ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 
-            // ✅ KATEGORI untuk filter tab
-            String kategori = "Pemerintah Daerah";
+                Connection conn = DatabaseConfig.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql);
 
-            // ✅ PIC & KONTAK
-            String picBlsdm = cbPicBlsdm.getValue();
-            String picPemda = txtPicPemda.getText().trim();
-            String kontakPic = txtKontakPemda.getText().trim(); // ✅ KONTAK PIC
+                pstmt.setString(1, cbJenisPerjanjian.getValue());
+                pstmt.setString(2, mitra);
+                pstmt.setString(3, jenisDokumen);
+                pstmt.setString(4, cbPICBlsdm.getValue());
+                pstmt.setString(5, txtNomorDokumenBalai.getText());
 
-            // ✅ QUERY dengan kolom kontak_pic
-            String sql = "INSERT INTO documents (nomor_dokumen, jenis, mitra, kategori, jenis_dokumen_detail, " +
-                    "tanggal_mulai, tanggal_berakhir, pic, kontak_pic, pic_blsdm, file_path, status, keterangan, created_by) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                LocalDate tglMulai = dpTanggalMulai.getValue();
+                pstmt.setDate(6, tglMulai != null ? java.sql.Date.valueOf(tglMulai) : null);
 
-            try (Connection conn = DatabaseConfig.connect();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                LocalDate tglBerakhir = dpTanggalBerakhir.getValue();
+                pstmt.setDate(7, tglBerakhir != null ? java.sql.Date.valueOf(tglBerakhir) : null);
 
-                String nomorDokumen = txtNomorDokumenBalai.getText().trim();
-                if (nomorDokumen.isEmpty()) nomorDokumen = txtNomorDokumenPemda.getText().trim();
-
-                pstmt.setString(1, nomorDokumen);
-                pstmt.setString(2, jenisPerjanjian);
-                pstmt.setString(3, mitra);
-                pstmt.setString(4, kategori);
-                pstmt.setString(5, jenisDokumenValue);
-                pstmt.setString(6, dpTanggalMulai.getValue() != null ? dpTanggalMulai.getValue().toString() : "");
-                pstmt.setString(7, dpTanggalBerakhir.getValue() != null ? dpTanggalBerakhir.getValue().toString() : "");
-                pstmt.setString(8, picPemda);        // PIC PEMDA
-                pstmt.setString(9, kontakPic);        // ✅ KONTAK PIC
-                pstmt.setString(10, picBlsdm);        // PIC BLSdm
-                pstmt.setString(11, filePath);
-                pstmt.setString(12, cbStatus.getValue());
-                pstmt.setString(13, txtCatatan.getText().trim());
-                pstmt.setInt(14, currentUserId);
+                pstmt.setString(8, cbStatus.getValue());
+                pstmt.setString(9, txtPICPemda.getText());
+                pstmt.setString(10, txtKontakPIC.getText());
+                pstmt.setString(11, txtPemilik.getText());
 
                 pstmt.executeUpdate();
-                showAlert("Sukses!", "Dokumen berhasil disimpan.", Alert.AlertType.INFORMATION);
-                ((Stage) txtNomorDokumenBalai.getScene().getWindow()).close();
+                conn.close();
+
+                showAlert("Sukses", "Dokumen berhasil disimpan!");
+                if (dashboardController != null) {
+                    dashboardController.handleDashboard();
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                showAlert("Error", "Gagal menyimpan dokumen: " + e.getMessage());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Error", "Gagal menyimpan: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
-    private String uploadFile(File file) {
-        try {
-            String uploadDir = "uploads/";
-            Path uploadPath = Paths.get(uploadDir);
-            if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
-            String fileName = System.currentTimeMillis() + "_" + file.getName();
-            Files.copy(file.toPath(), uploadPath.resolve(fileName));
-            return uploadPath.resolve(fileName).toString();
-        } catch (Exception e) { return ""; }
+    private boolean validateForm() {
+        if (cbJenisPerjanjian.getValue() == null || cbJenisPerjanjian.getValue().isEmpty()) {
+            showAlert("Error", "Jenis Perjanjian harus dipilih!");
+            return false;
+        }
+        if (cbTingkatKerjaSama.getValue() == null || cbTingkatKerjaSama.getValue().isEmpty()) {
+            showAlert("Error", "Tingkat Kerja Sama harus dipilih!");
+            return false;
+        }
+        if (cbProvinsi.getValue() == null || cbProvinsi.getValue().isEmpty()) {
+            showAlert("Error", "Provinsi harus dipilih!");
+            return false;
+        }
+        if ("Pemerintah Kabupaten/Kota".equals(cbTingkatKerjaSama.getValue())) {
+            if (cbKabKota.getValue() == null || cbKabKota.getValue().isEmpty()) {
+                showAlert("Error", "Kabupaten/Kota harus dipilih!");
+                return false;
+            }
+        }
+        if (cbJenisDokumen.getValue() == null || cbJenisDokumen.getValue().isEmpty()) {
+            showAlert("Error", "Jenis Dokumen harus dipilih!");
+            return false;
+        }
+        if ("Lainnya...".equals(cbJenisDokumen.getValue())) {
+            if (txtJenisDokumenLainnya.getText().trim().isEmpty()) {
+                showAlert("Error", "Jenis Dokumen Lainnya harus diisi!");
+                return false;
+            }
+        }
+        if (txtNomorDokumenBalai.getText().isEmpty()) {
+            showAlert("Error", "Nomor Dokumen Balai harus diisi!");
+            return false;
+        }
+        if (txtPICPemda.getText().isEmpty()) {
+            showAlert("Error", "PIC Pemerintah Daerah harus diisi!");
+            return false;
+        }
+        if (dpTanggalMulai.getValue() == null) {
+            showAlert("Error", "Tanggal Mulai harus dipilih!");
+            return false;
+        }
+        return true;
     }
 
-    @FXML private void handleBack() { ((Stage) txtNomorDokumenBalai.getScene().getWindow()).close(); }
-    @FXML private void handleCancel() { handleBack(); }
-
-    private void showAlert(String t, String m, Alert.AlertType type) {
-        new Alert(type, m, ButtonType.OK).showAndWait();
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

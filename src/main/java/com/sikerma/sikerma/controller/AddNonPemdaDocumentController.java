@@ -5,7 +5,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -13,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.time.LocalDate;
 
 public class AddNonPemdaDocumentController {
 
@@ -34,11 +32,19 @@ public class AddNonPemdaDocumentController {
     @FXML private TextArea txtCatatan;
     @FXML private Label lblFileName;
 
+    // Field untuk conditional
+    @FXML private Label lblJenisDokumenLainnya;
+
     private File selectedFile;
     private int currentUserId;
+    private DashboardController dashboardController;
 
     public void setCurrentUserId(int userId) {
         this.currentUserId = userId;
+    }
+
+    public void setDashboardController(DashboardController controller) {
+        this.dashboardController = controller;
     }
 
     @FXML
@@ -56,19 +62,6 @@ public class AddNonPemdaDocumentController {
         );
         cbJenisDokumen.setValue("Pilih jenis dokumen");
 
-        cbJenisDokumen.setOnAction(e -> {
-            String selected = cbJenisDokumen.getValue();
-            if ("Lainnya...".equals(selected)) {
-                boxJenisDokumenLainnya.setVisible(true);
-                boxJenisDokumenLainnya.setManaged(true);
-                txtJenisDokumenLainnya.requestFocus();
-            } else {
-                boxJenisDokumenLainnya.setVisible(false);
-                boxJenisDokumenLainnya.setManaged(false);
-                txtJenisDokumenLainnya.setText("");
-            }
-        });
-
         cbPicBlsdm.getItems().addAll("Dr. Ahmad Santoso, M.Si", "Dra. Maria Wowor, M.Pd",
                 "Ir. John Lengkong, M.T", "Drs. Sarah Tumangkeng, M.Si");
         cbPicBlsdm.setValue("Pilih PIC BLSDM Komdigi Manado");
@@ -79,6 +72,39 @@ public class AddNonPemdaDocumentController {
                 "Persiapan TTD Para Pihak", "Selesai"
         );
         cbStatus.setValue("Baru");
+
+        // Setup event handler
+        setupEventHandlers();
+    }
+
+    private void setupEventHandlers() {
+        // Hide conditional fields di awal
+        hideConditionalFields();
+
+        // Handle Jenis Dokumen - show/hide text field
+        cbJenisDokumen.setOnAction(e -> {
+            String selected = cbJenisDokumen.getValue();
+            if ("Lainnya...".equals(selected)) {
+                lblJenisDokumenLainnya.setVisible(true);
+                lblJenisDokumenLainnya.setManaged(true);
+                boxJenisDokumenLainnya.setVisible(true);
+                boxJenisDokumenLainnya.setManaged(true);
+                txtJenisDokumenLainnya.requestFocus();
+            } else {
+                lblJenisDokumenLainnya.setVisible(false);
+                lblJenisDokumenLainnya.setManaged(false);
+                boxJenisDokumenLainnya.setVisible(false);
+                boxJenisDokumenLainnya.setManaged(false);
+                txtJenisDokumenLainnya.setText("");
+            }
+        });
+    }
+
+    private void hideConditionalFields() {
+        lblJenisDokumenLainnya.setVisible(false);
+        lblJenisDokumenLainnya.setManaged(false);
+        boxJenisDokumenLainnya.setVisible(false);
+        boxJenisDokumenLainnya.setManaged(false);
     }
 
     @FXML
@@ -95,7 +121,6 @@ public class AddNonPemdaDocumentController {
         }
     }
 
-    // ✅✅✅ METHOD INI DI-UPDATE: Simpan PIC BLSDM ke database ✅✅✅
     @FXML
     private void handleSave() {
         if (txtTingkatKerjaSama.getText().trim().isEmpty()) {
@@ -106,7 +131,6 @@ public class AddNonPemdaDocumentController {
         try {
             String filePath = selectedFile != null ? uploadFile(selectedFile) : "";
 
-            // ✅ Ambil Jenis Dokumen
             String jenisDokumenValue = cbJenisDokumen.getValue();
             if ("Lainnya...".equals(jenisDokumenValue)) {
                 jenisDokumenValue = txtJenisDokumenLainnya.getText().trim();
@@ -116,7 +140,6 @@ public class AddNonPemdaDocumentController {
                 }
             }
 
-            // ✅ SINGKAT JENIS PERJANJIAN: MoU atau PKS saja
             String jenisPerjanjian = cbJenisPerjanjian.getValue();
             if (jenisPerjanjian != null) {
                 if (jenisPerjanjian.contains("MoU")) {
@@ -126,18 +149,12 @@ public class AddNonPemdaDocumentController {
                 }
             }
 
-            // ✅ KATEGORI untuk filter tab
             String kategori = "Non-Pemerintah";
-
-            // ✅ MITRA = Nama instansi yang diketik user
             String mitra = txtTingkatKerjaSama.getText().trim();
+            String picBlsdm = cbPicBlsdm.getValue();
+            String picMitra = txtPicMitra.getText().trim();
+            String kontakPic = txtKontakMitra.getText().trim();
 
-            // ✅ PIC BLSDM & PIC MITRA (BERBEDA)
-            String picBlsdm = cbPicBlsdm.getValue();  // ✅ PIC BLSDM
-            String picMitra = txtPicMitra.getText().trim();  // ✅ PIC MITRA
-            String kontakPic = txtKontakMitra.getText().trim();  // ✅ KONTAK PIC MITRA
-
-            // ✅ QUERY dengan kolom pic_blsdm dan kontak_pic
             String sql = "INSERT INTO documents (nomor_dokumen, jenis, mitra, kategori, jenis_dokumen_detail, " +
                     "tanggal_mulai, tanggal_berakhir, pic, kontak_pic, pic_blsdm, file_path, status, keterangan, created_by) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -155,9 +172,9 @@ public class AddNonPemdaDocumentController {
                 pstmt.setString(5, jenisDokumenValue);
                 pstmt.setString(6, dpTanggalMulai.getValue() != null ? dpTanggalMulai.getValue().toString() : "");
                 pstmt.setString(7, dpTanggalBerakhir.getValue() != null ? dpTanggalBerakhir.getValue().toString() : "");
-                pstmt.setString(8, picMitra);        // ✅ PIC MITRA
-                pstmt.setString(9, kontakPic);        // ✅ KONTAK PIC MITRA
-                pstmt.setString(10, picBlsdm);        // ✅ PIC BLSDM (field baru)
+                pstmt.setString(8, picMitra);
+                pstmt.setString(9, kontakPic);
+                pstmt.setString(10, picBlsdm);
                 pstmt.setString(11, filePath);
                 pstmt.setString(12, cbStatus.getValue());
                 pstmt.setString(13, txtCatatan.getText().trim());
@@ -165,7 +182,10 @@ public class AddNonPemdaDocumentController {
 
                 pstmt.executeUpdate();
                 showAlert("Sukses!", "Dokumen berhasil disimpan.", Alert.AlertType.INFORMATION);
-                ((Stage) txtNomorDokumenBalai.getScene().getWindow()).close();
+
+                if (dashboardController != null) {
+                    dashboardController.handleDashboard();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -184,13 +204,11 @@ public class AddNonPemdaDocumentController {
         } catch (Exception e) { return ""; }
     }
 
-    @FXML private void handleBack() { ((Stage) txtNomorDokumenBalai.getScene().getWindow()).close(); }
-
-    @FXML private void handleCancel() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Batal");
-        alert.setContentText("Yakin ingin membatalkan?");
-        alert.showAndWait().ifPresent(r -> { if (r == ButtonType.OK) handleBack(); });
+    @FXML
+    private void handleCancel() {
+        if (dashboardController != null) {
+            dashboardController.handleDashboard();
+        }
     }
 
     private void showAlert(String t, String m, Alert.AlertType type) {

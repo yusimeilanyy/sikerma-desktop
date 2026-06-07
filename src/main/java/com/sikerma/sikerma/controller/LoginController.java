@@ -3,11 +3,13 @@ package com.sikerma.sikerma.controller;
 import com.sikerma.sikerma.config.DatabaseConfig;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import java.sql.Connection;
@@ -38,34 +40,29 @@ public class LoginController {
         }
 
         // 2. Query ke Database
-        // Tabel users punya kolom: username, password_hash, role, full_name
         String sql = "SELECT * FROM users WHERE username = ? AND password_hash = ? AND is_active = 1";
 
         try (Connection conn = DatabaseConfig.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, username);
-            pstmt.setString(2, password); // Di proyek nyata, password sebaiknya di-hash (bcrypt), tapi untuk tugas ini plain text dulu ok.
+            pstmt.setString(2, password);
 
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                // LOGIN BERHASIL
                 String fullName = rs.getString("full_name");
                 String role = rs.getString("role");
                 int userId = rs.getInt("id");
 
                 showAlert("Login Berhasil!", "Selamat datang, " + fullName + "!", Alert.AlertType.INFORMATION);
 
-                // Tutup window login
                 Stage loginStage = (Stage) txtUsername.getScene().getWindow();
                 loginStage.close();
 
-                // Buka Dashboard (Kita akan buat file ini selanjutnya)
                 openDashboard(fullName, role, userId);
 
             } else {
-                // LOGIN GAGAL
                 lblMessage.setText("❌ Username atau Password salah!");
                 lblMessage.setStyle("-fx-text-fill: red;");
             }
@@ -86,13 +83,15 @@ public class LoginController {
 
     private void openDashboard(String fullName, String role, int userId) {
         try {
-            // Load file dashboard.fxml
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard.fxml"));
-            Scene scene = new Scene(loader.load(), 1000, 600); // Ukuran window dashboard
+            BorderPane root = loader.load(); // ✅ Ubah dari Parent ke BorderPane
 
-            // Kirim data user ke controller dashboard
+            Scene scene = new Scene(root, 1200, 750);
+
             DashboardController controller = loader.getController();
             controller.setUserData(userId, fullName, role);
+
+            controller.setMainLayout(root);
 
             Stage stage = new Stage();
             stage.setTitle("Dashboard SIKERMA - " + role.toUpperCase());
