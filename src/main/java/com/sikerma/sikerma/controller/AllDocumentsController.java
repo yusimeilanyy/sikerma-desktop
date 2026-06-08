@@ -9,6 +9,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -17,6 +18,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -46,11 +52,11 @@ public class AllDocumentsController {
     @FXML private TableColumn<Document, Void> colAksi;
 
     private ObservableList<Document> documentList = FXCollections.observableArrayList();
+    private ObservableList<Document> filteredList = FXCollections.observableArrayList();
     private int currentUserId;
     private String currentFilter = "Pemerintah Daerah";
-    private DashboardController dashboardController; // ✅ TAMBAHAN
+    private DashboardController dashboardController;
 
-    // ✅ TAMBAHAN: Method untuk set dashboard controller
     public void setDashboardController(DashboardController controller) {
         this.dashboardController = controller;
     }
@@ -63,7 +69,7 @@ public class AllDocumentsController {
     }
 
     private void initializeTable() {
-        // ✅ Jenis Perjanjian - CENTER
+        // ✅ Jenis Perjanjian - HANYA TAMPILKAN MoU/PKS
         colJenisPerjanjian.setCellValueFactory(new PropertyValueFactory<>("jenis"));
         colJenisPerjanjian.setCellFactory(column -> new TableCell<>() {
             @Override
@@ -73,11 +79,20 @@ public class AllDocumentsController {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    setText(item);
+                    // ✅ Ambil hanya "MoU" atau "PKS" saja
+                    String displayText = item;
+                    if (item.contains("(")) {
+                        displayText = item.substring(0, item.indexOf("(")).trim();
+                    }
+                    if (displayText.contains(" ")) {
+                        displayText = displayText.split(" ")[0];
+                    }
+
+                    setText(displayText);
                     setWrapText(true);
                     setTextAlignment(TextAlignment.CENTER);
                     setAlignment(Pos.CENTER);
-                    setStyle("-fx-text-fill: #475569; -fx-padding: 8 5;");
+                    setStyle("-fx-text-fill: #475569; -fx-padding: 8 5; -fx-font-weight: bold;");
                 }
             }
         });
@@ -297,12 +312,10 @@ public class AllDocumentsController {
                 } else {
                     Label badge = new Label(item);
 
-                    // Default colors
                     String bgColor = "#f1f5f9";
                     String textColor = "#64748b";
 
                     String s = item.toLowerCase();
-                    // ✅ Warna Soft persis gambar
                     if (s.equals("baru")) { bgColor = "#dbeafe"; textColor = "#1e40af"; }
                     else if (s.equals("dalam proses")) { bgColor = "#fef9c3"; textColor = "#854d0e"; }
                     else if (s.contains("review bpsdmp")) { bgColor = "#ffedd5"; textColor = "#9a3412"; }
@@ -312,7 +325,6 @@ public class AllDocumentsController {
                     else if (s.equals("aktif")) { bgColor = "#d1fae5"; textColor = "#065f46"; }
                     else if (s.equals("kadaluarsa")) { bgColor = "#fee2e2"; textColor = "#991b1b"; }
 
-                    // Style: Soft background, rounded corners, wrap text
                     badge.setStyle("-fx-background-color: " + bgColor + "; " +
                             "-fx-text-fill: " + textColor + "; " +
                             "-fx-background-radius: 10; " +
@@ -333,12 +345,16 @@ public class AllDocumentsController {
         colStatus.setMaxWidth(150);
         colStatus.setMinWidth(150);
 
-        // ✅ Catatan - CENTER
+        // ✅ Catatan - CENTER (FIX: tampilkan "-" jika kosong)
         colCatatan.setCellValueFactory(cellData -> {
             Document doc = cellData.getValue();
             if (doc == null) return new javafx.beans.property.SimpleStringProperty("-");
             String ket = doc.getKeterangan();
-            return new javafx.beans.property.SimpleStringProperty(ket != null && !ket.isEmpty() ? ket : "-");
+            // ✅ FIX: Cek null, kosong, atau whitespace
+            if (ket == null || ket.trim().isEmpty()) {
+                return new javafx.beans.property.SimpleStringProperty("-");
+            }
+            return new javafx.beans.property.SimpleStringProperty(ket.trim());
         });
         colCatatan.setCellFactory(column -> new TableCell<>() {
             @Override
@@ -369,18 +385,15 @@ public class AllDocumentsController {
                     setGraphic(null);
                 } else {
                     Document doc = getTableView().getItems().get(getIndex());
-                    if (doc == null || doc.getFilePath() == null) {
+                    if (doc == null || doc.getFilePath() == null || doc.getFilePath().isEmpty()) {
                         setGraphic(null);
                         return;
                     }
 
                     Label icon = new Label("📄");
                     icon.setStyle("-fx-cursor: hand; -fx-font-size: 20px;");
-                    icon.setTooltip(new Tooltip("Download Dokumen"));
-                    icon.setOnMouseClicked(e -> {
-                        showAlert("Info", "Download dokumen: " +
-                                (doc.getNomorDokumen() != null ? doc.getNomorDokumen() : "Unknown"));
-                    });
+                    icon.setTooltip(new Tooltip("Lihat Dokumen"));
+                    icon.setOnMouseClicked(e -> handleViewDocument(doc));
                     setGraphic(icon);
                     setAlignment(Pos.CENTER);
                 }
@@ -429,7 +442,7 @@ public class AllDocumentsController {
         colAksi.setMaxWidth(120);
         colAksi.setMinWidth(120);
 
-        // ✅ Row Height (Tinggi baris)
+        // ✅ Row Height
         tableDocuments.setRowFactory(tv -> new TableRow<>() {
             @Override
             protected void updateItem(Document item, boolean empty) {
@@ -444,6 +457,9 @@ public class AllDocumentsController {
                 "Review BPSDMP Kominfo", "Review BPSDMP 1", "Review PEMDA 2",
                 "Review BPSDMP 2", "Persiapan TTD Para Pihak", "Selesai");
         cbStatusFilter.setValue("Semua Status");
+
+        // ✅ TAMBAHAN: Event handler untuk filter status
+        cbStatusFilter.setOnAction(e -> applyFilters());
     }
 
     private void loadDocuments() {
@@ -483,12 +499,60 @@ public class AllDocumentsController {
                 documentList.add(doc);
             }
 
+            filteredList = FXCollections.observableArrayList(documentList);
             lblTotalDocs.setText("(" + documentList.size() + ")");
-            tableDocuments.setItems(documentList);
+            tableDocuments.setItems(filteredList);
+            applyFilters();
 
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Error", "Gagal memuat data: " + e.getMessage());
+        }
+    }
+
+    // ✅ TAMBAHAN: Method untuk apply filter status dan search
+    private void applyFilters() {
+        String selectedStatus = cbStatusFilter.getValue();
+        String keyword = txtSearch.getText().toLowerCase();
+
+        ObservableList<Document> filtered = FXCollections.observableArrayList();
+
+        for (Document doc : documentList) {
+            boolean matchStatus = "Semua Status".equals(selectedStatus) ||
+                    doc.getStatus().equals(selectedStatus);
+
+            boolean matchSearch = keyword.isEmpty() ||
+                    doc.getNomorDokumen().toLowerCase().contains(keyword) ||
+                    doc.getMitra().toLowerCase().contains(keyword) ||
+                    doc.getJenis().toLowerCase().contains(keyword);
+
+            if (matchStatus && matchSearch) {
+                filtered.add(doc);
+            }
+        }
+
+        tableDocuments.setItems(filtered);
+        lblTotalDocs.setText("(" + filtered.size() + ")");
+    }
+
+    // ✅ TAMBAHAN: Method untuk view/download dokumen
+    private void handleViewDocument(Document doc) {
+        if (doc.getFilePath() == null || doc.getFilePath().isEmpty()) {
+            showAlert("Info", "Dokumen belum diupload.");
+            return;
+        }
+
+        File file = new File(doc.getFilePath());
+        if (!file.exists()) {
+            showAlert("Error", "File dokumen tidak ditemukan: " + doc.getFilePath());
+            return;
+        }
+
+        try {
+            // Buka file dengan aplikasi default
+            java.awt.Desktop.getDesktop().open(file);
+        } catch (IOException e) {
+            showAlert("Error", "Gagal membuka dokumen: " + e.getMessage());
         }
     }
 
@@ -516,20 +580,7 @@ public class AllDocumentsController {
 
     @FXML
     private void handleSearch() {
-        String keyword = txtSearch.getText().toLowerCase();
-        ObservableList<Document> filtered = FXCollections.observableArrayList();
-
-        for (Document doc : documentList) {
-            String nomorDoc = doc.getNomorDokumen() != null ? doc.getNomorDokumen().toLowerCase() : "";
-            String mitra = doc.getMitra() != null ? doc.getMitra().toLowerCase() : "";
-            String jenis = doc.getJenis() != null ? doc.getJenis().toLowerCase() : "";
-
-            if (nomorDoc.contains(keyword) || mitra.contains(keyword) || jenis.contains(keyword)) {
-                filtered.add(doc);
-            }
-        }
-        tableDocuments.setItems(filtered);
-        lblTotalDocs.setText("(" + filtered.size() + ")");
+        applyFilters();
     }
 
     @FXML
@@ -551,11 +602,9 @@ public class AllDocumentsController {
 
     @FXML
     private void handleBack() {
-        // ✅ Jika ada dashboardController, kembali ke dashboard
         if (dashboardController != null) {
             dashboardController.handleDashboard();
         } else {
-            // Fallback: tutup window
             Stage stage = (Stage) ((Node) btnPemda).getScene().getWindow();
             stage.close();
         }
@@ -564,16 +613,40 @@ public class AllDocumentsController {
     @FXML
     private void handleEdit(Document doc) {
         try {
-            String fxmlFile = "Pemerintah Daerah".equals(currentFilter) ?
-                    "/fxml/edit_pemda_document.fxml" : "/fxml/edit_non_pemda_document.fxml";
+            // ✅ FIX: Gunakan form add yang sudah ada sebagai form edit
+            String fxmlFile = "Pemerintah Daerah".equals(doc.getKategori()) ?
+                    "/fxml/add_pemda_document.fxml" : "/fxml/add_non_pemda_document.fxml";
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
-            Stage stage = new Stage();
-            stage.setScene(new Scene(loader.load(), 800, 700));
-            stage.setTitle("Edit Dokumen - " + doc.getNomorDokumen());
+            Parent formRoot = loader.load();
 
-            stage.showAndWait();
-            loadDocuments();
+            // ✅ Set data dokumen ke controller
+            Object controller = loader.getController();
+            if ("Pemerintah Daerah".equals(doc.getKategori())) {
+                if (controller instanceof AddPemdaDocumentController) {
+                    ((AddPemdaDocumentController) controller).setCurrentUserId(currentUserId);
+                    ((AddPemdaDocumentController) controller).setDashboardController(dashboardController);
+                    ((AddPemdaDocumentController) controller).setDocumentData(doc);
+                }
+            } else {
+                if (controller instanceof AddNonPemdaDocumentController) {
+                    ((AddNonPemdaDocumentController) controller).setCurrentUserId(currentUserId);
+                    ((AddNonPemdaDocumentController) controller).setDashboardController(dashboardController);
+                    ((AddNonPemdaDocumentController) controller).setDocumentData(doc);
+                }
+            }
+
+            if (dashboardController != null && dashboardController.getMainLayout() != null) {
+                dashboardController.getMainLayout().setCenter(formRoot);
+            } else {
+                // Fallback: tampilkan di window baru
+                Stage stage = new Stage();
+                stage.setTitle("Edit Dokumen - " + doc.getNomorDokumen());
+                stage.setScene(new Scene(formRoot, 1200, 750));
+                stage.showAndWait();
+                loadDocuments();
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Error", "Gagal membuka form edit: " + e.getMessage());

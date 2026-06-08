@@ -9,6 +9,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
@@ -43,6 +44,7 @@ public class DashboardController {
     @FXML private ComboBox<String> cbJenis;
     @FXML private ComboBox<String> cbStatus;
     @FXML private ComboBox<String> cbPerPage;
+    @FXML private ComboBox<String> cbTahun;
 
     @FXML private TableView<Document> tableDocuments;
     @FXML private TableColumn<Document, Integer> colNo;
@@ -58,11 +60,15 @@ public class DashboardController {
     @FXML private Button btnSemuaDokumen;
     @FXML private Button btnPerpanjangan;
     @FXML private Button btnNotifikasi;
+    @FXML private Button btnUser; // ✅ TAMBAHAN BARU
     @FXML private Button btnPage1;
     @FXML private Button btnPage2;
     @FXML private Button btnPage3;
     @FXML private Button btnPage4;
     @FXML private Button btnLogout;
+
+    @FXML private BarChart<String, Number> barChartMoUPks;
+    @FXML private LineChart<String, Number> lineChartTren;
 
     private ObservableList<Document> documentList = FXCollections.observableArrayList();
     private int currentUserId;
@@ -369,9 +375,157 @@ public class DashboardController {
             tableDocuments.setItems(documentList);
             updatePaginationButtons();
 
+            // Initialize dan update charts
+            initializeCharts();
+            updateCharts();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void initializeCharts() {
+        cbTahun.getItems().clear();
+        int currentYear = LocalDate.now().getYear();
+        for (int year = currentYear - 2; year <= currentYear + 2; year++) {
+            cbTahun.getItems().add(String.valueOf(year));
+        }
+        cbTahun.setValue(String.valueOf(currentYear));
+
+        cbTahun.setOnAction(e -> {
+            updateCharts();
+        });
+
+        setupBarChart();
+        setupLineChart();
+    }
+
+    private void setupBarChart() {
+        barChartMoUPks.setAnimated(false);
+        barChartMoUPks.setStyle("-fx-background-color: transparent;");
+        barChartMoUPks.setLegendSide(javafx.geometry.Side.BOTTOM);
+        barChartMoUPks.lookup(".chart-legend").setStyle("-fx-background-color: transparent; -fx-padding: 10 0 0 0;");
+    }
+
+    private void setupLineChart() {
+        lineChartTren.setAnimated(false);
+        lineChartTren.setStyle("-fx-background-color: transparent;");
+
+        CategoryAxis xAxis = (CategoryAxis) lineChartTren.getXAxis();
+        xAxis.getCategories().clear();
+        xAxis.getCategories().addAll("Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+                "Jul", "Agu", "Sep", "Okt", "Nov", "Des");
+
+        lineChartTren.setLegendSide(javafx.geometry.Side.BOTTOM);
+        lineChartTren.lookup(".chart-legend").setStyle("-fx-background-color: transparent; -fx-padding: 10 0 0 0;");
+    }
+
+    private void updateCharts() {
+        updateBarChart();
+        updateLineChart();
+    }
+
+    private void updateBarChart() {
+        int mouAktif = 0, mouExpired = 0, pksAktif = 0, pksExpired = 0;
+        LocalDate today = LocalDate.now();
+
+        for (Document doc : documentList) {
+            boolean isExpired = doc.getTanggalBerakhir() != null && doc.getTanggalBerakhir().isBefore(today);
+
+            if ("MOU".equals(doc.getJenis())) {
+                if (isExpired) mouExpired++;
+                else mouAktif++;
+            } else if ("PKS".equals(doc.getJenis())) {
+                if (isExpired) pksExpired++;
+                else pksAktif++;
+            }
+        }
+
+        XYChart.Series<String, Number> seriesAktif = new XYChart.Series<>();
+        seriesAktif.setName("Aktif");
+        seriesAktif.getData().add(new XYChart.Data<>("MoU", mouAktif));
+        seriesAktif.getData().add(new XYChart.Data<>("PKS", pksAktif));
+
+        XYChart.Series<String, Number> seriesExpired = new XYChart.Series<>();
+        seriesExpired.setName("Kadaluarsa");
+        seriesExpired.getData().add(new XYChart.Data<>("MoU", mouExpired));
+        seriesExpired.getData().add(new XYChart.Data<>("PKS", pksExpired));
+
+        barChartMoUPks.getData().clear();
+        barChartMoUPks.getData().addAll(seriesAktif, seriesExpired);
+
+        applyBarChartColors();
+    }
+
+    private void applyBarChartColors() {
+        barChartMoUPks.getData().get(0).getNode().setStyle(
+                "-fx-bar-fill: #14b8a6; -fx-background-color: #14b8a6;"
+        );
+
+        barChartMoUPks.getData().get(1).getNode().setStyle(
+                "-fx-bar-fill: #fb923c; -fx-background-color: #fb923c;"
+        );
+    }
+
+    private void updateLineChart() {
+        String selectedYear = cbTahun.getValue();
+        if (selectedYear == null) selectedYear = String.valueOf(LocalDate.now().getYear());
+
+        int year = Integer.parseInt(selectedYear);
+
+        int[] mouPerMonth = new int[12];
+        int[] pksPerMonth = new int[12];
+
+        for (Document doc : documentList) {
+            if (doc.getTanggalMulai() != null && doc.getTanggalMulai().getYear() == year) {
+                int month = doc.getTanggalMulai().getMonthValue() - 1;
+                if ("MOU".equals(doc.getJenis())) {
+                    mouPerMonth[month]++;
+                } else if ("PKS".equals(doc.getJenis())) {
+                    pksPerMonth[month]++;
+                }
+            }
+        }
+
+        XYChart.Series<String, Number> seriesMoU = new XYChart.Series<>();
+        seriesMoU.setName("MoU Baru");
+        for (int i = 0; i < 12; i++) {
+            seriesMoU.getData().add(new XYChart.Data<>(getMonthName(i), mouPerMonth[i]));
+        }
+
+        XYChart.Series<String, Number> seriesPKS = new XYChart.Series<>();
+        seriesPKS.setName("PKS Baru");
+        for (int i = 0; i < 12; i++) {
+            seriesPKS.getData().add(new XYChart.Data<>(getMonthName(i), pksPerMonth[i]));
+        }
+
+        lineChartTren.getData().clear();
+        lineChartTren.getData().addAll(seriesMoU, seriesPKS);
+
+        applyLineChartColors();
+    }
+
+    private void applyLineChartColors() {
+        lineChartTren.getData().get(0).getNode().setStyle(
+                "-fx-stroke: #14b8a6; -fx-stroke-width: 3px;"
+        );
+
+        lineChartTren.getData().get(1).getNode().setStyle(
+                "-fx-stroke: #fb923c; -fx-stroke-width: 3px;"
+        );
+
+        for (XYChart.Series<String, Number> series : lineChartTren.getData()) {
+            series.getNode().lookup(".chart-series-line").setStyle(
+                    "-fx-stroke: " + (series.getName().equals("MoU Baru") ? "#14b8a6" : "#fb923c") +
+                            "; -fx-stroke-width: 3px;"
+            );
+        }
+    }
+
+    private String getMonthName(int month) {
+        String[] months = {"Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+                "Jul", "Agu", "Sep", "Okt", "Nov", "Des"};
+        return months[month];
     }
 
     private int getMouActiveCount() {
@@ -418,7 +572,6 @@ public class DashboardController {
         }
     }
 
-    // ✅ PERBAIKAN: Jangan load ulang FXML, cukup refresh data
     @FXML
     public void handleDashboard() {
         currentPage = 1;
@@ -497,8 +650,27 @@ public class DashboardController {
         updateMenuStyle(btnNotifikasi);
     }
 
-    @FXML private void handleUsers() {
-        showAlert("Info", "Manajemen User (Admin Only)");
+    // ✅ TAMBAHAN BARU: Method untuk membuka halaman User Management
+    @FXML
+    private void handleUsers() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/user_management.fxml"));
+            Parent root = loader.load();
+
+            UserManagementController controller = loader.getController();
+            controller.setCurrentUserId(currentUserId);
+            controller.setDashboardController(this);
+
+            if (mainLayout != null) {
+                mainLayout.setCenter(root);
+            }
+
+            updateMenuStyle(btnUser);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error", "Gagal membuka halaman user: " + e.getMessage());
+        }
     }
 
     @FXML private void handleSearch() {
@@ -552,11 +724,12 @@ public class DashboardController {
         stage.close();
     }
 
+    // ✅ TAMBAHAN BARU: Update array buttons untuk termasuk btnUser
     private void updateMenuStyle(Button activeButton) {
         String activeStyle = "-fx-background-color: #eff6ff; -fx-text-fill: #2563eb; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12 16; -fx-cursor: hand; -fx-alignment: CENTER_LEFT;";
         String inactiveStyle = "-fx-background-color: transparent; -fx-text-fill: #475569; -fx-padding: 12 16; -fx-cursor: hand; -fx-alignment: CENTER_LEFT;";
 
-        Button[] buttons = {btnDashboard, btnTambah, btnSemuaDokumen, btnPerpanjangan, btnNotifikasi};
+        Button[] buttons = {btnDashboard, btnTambah, btnSemuaDokumen, btnPerpanjangan, btnNotifikasi, btnUser};
         for (Button btn : buttons) {
             if (btn == activeButton) {
                 btn.setStyle(activeStyle);
@@ -571,5 +744,9 @@ public class DashboardController {
         alert.setTitle(title);
         alert.setContentText(msg);
         alert.showAndWait();
+    }
+
+    public BorderPane getMainLayout() {
+        return mainLayout;
     }
 }

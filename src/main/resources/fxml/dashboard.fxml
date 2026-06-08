@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
@@ -40,6 +41,10 @@
                 <Button fx:id="btnNotifikasi" text="Notifikasi"
                         style="-fx-background-color: transparent; -fx-text-fill: #475569; -fx-padding: 12 16; -fx-cursor: hand; -fx-alignment: CENTER_LEFT;"
                         maxWidth="Infinity" onAction="#handleNotifications"/>
+                <!-- ✅ TAMBAHKAN fx:id="btnUser" -->
+                <Button fx:id="btnUser" text="User"
+                        style="-fx-background-color: transparent; -fx-text-fill: #475569; -fx-padding: 12 16; -fx-cursor: hand; -fx-alignment: CENTER_LEFT;"
+                        maxWidth="Infinity" onAction="#handleUsers"/>
             </VBox>
             <VBox spacing="15" style="-fx-padding: 15 12 25 12;">
                 <Separator style="-fx-background-color: #e2e8f0;"/>
@@ -183,6 +188,50 @@
                             <Button text="&gt;" style="-fx-background-color: #f1f5f9; -fx-text-fill: #94a3b8; -fx-background-radius: 8; -fx-padding: 8 12; -fx-cursor: hand;" onAction="#handleNextPage"/>
                         </HBox>
                         <ComboBox fx:id="cbPerPage" value="5 / halaman" prefWidth="110" style="-fx-background-radius: 8; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- CHART SECTION -->
+                <VBox spacing="20" style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24;">
+                    <Label text="Statistik &amp; Tren Dokumen" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+
+                    <HBox spacing="20">
+                        <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-border-width: 1; -fx-padding: 20;" HBox.hgrow="ALWAYS">
+                            <Label text="Perbandingan MoU &amp; PKS" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                            <Label text="Status aktif vs kadaluarsa" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+
+                            <StackPane VBox.vgrow="ALWAYS" style="-fx-padding: 20 0 0 0;">
+                                <BarChart fx:id="barChartMoUPks" alternativeRowFillVisible="false" horizontalGridLinesVisible="true" verticalGridLinesVisible="false" legendVisible="true">
+                                    <xAxis>
+                                        <CategoryAxis side="BOTTOM" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+                                    </xAxis>
+                                    <yAxis>
+                                        <NumberAxis side="LEFT" style="-fx-font-size: 12px; -fx-text-fill: #64748b;" tickUnit="1"/>
+                                    </yAxis>
+                                </BarChart>
+                            </StackPane>
+                        </VBox>
+
+                        <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-border-width: 1; -fx-padding: 20;" HBox.hgrow="ALWAYS">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Label text="Tren Dokumen Baru (Bulanan)" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label text="Tahun" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+                                <ComboBox fx:id="cbTahun" prefWidth="80" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0;"/>
+                            </HBox>
+                            <Label text="Berdasarkan tanggal mulai kerja sama" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+
+                            <StackPane VBox.vgrow="ALWAYS" style="-fx-padding: 20 0 0 0;">
+                                <LineChart fx:id="lineChartTren" alternativeColumnFillVisible="false" horizontalGridLinesVisible="true" verticalGridLinesVisible="false" legendVisible="true">
+                                    <xAxis>
+                                        <CategoryAxis side="BOTTOM" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+                                    </xAxis>
+                                    <yAxis>
+                                        <NumberAxis side="LEFT" style="-fx-font-size: 12px; -fx-text-fill: #64748b;" tickUnit="1"/>
+                                    </yAxis>
+                                </LineChart>
+                            </StackPane>
+                        </VBox>
                     </HBox>
                 </VBox>
 

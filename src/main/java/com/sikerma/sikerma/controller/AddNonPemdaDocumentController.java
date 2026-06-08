@@ -1,6 +1,7 @@
 package com.sikerma.sikerma.controller;
 
 import com.sikerma.sikerma.config.DatabaseConfig;
+import com.sikerma.sikerma.model.Document;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
@@ -38,6 +39,8 @@ public class AddNonPemdaDocumentController {
     private File selectedFile;
     private int currentUserId;
     private DashboardController dashboardController;
+    // ✅ TAMBAHAN: Field untuk mode edit
+    private Document editingDocument = null;
 
     public void setCurrentUserId(int userId) {
         this.currentUserId = userId;
@@ -45,6 +48,48 @@ public class AddNonPemdaDocumentController {
 
     public void setDashboardController(DashboardController controller) {
         this.dashboardController = controller;
+    }
+
+    // ✅ TAMBAHAN: Method untuk set data dokumen saat edit
+    public void setDocumentData(Document doc) {
+        this.editingDocument = doc;
+
+        // Isi form dengan data dokumen
+        if (doc.getJenis() != null) {
+            if (doc.getJenis().contains("MoU")) {
+                cbJenisPerjanjian.setValue("MoU (Memorandum of Understanding)");
+            } else if (doc.getJenis().contains("PKS")) {
+                cbJenisPerjanjian.setValue("PKS (Perjanjian Kerja Sama)");
+            }
+        }
+
+        if (doc.getJenisDokumenDetail() != null) {
+            if (cbJenisDokumen.getItems().contains(doc.getJenisDokumenDetail())) {
+                cbJenisDokumen.setValue(doc.getJenisDokumenDetail());
+            } else {
+                cbJenisDokumen.setValue("Lainnya...");
+                boxJenisDokumenLainnya.setVisible(true);
+                boxJenisDokumenLainnya.setManaged(true);
+                lblJenisDokumenLainnya.setVisible(true);
+                lblJenisDokumenLainnya.setManaged(true);
+                txtJenisDokumenLainnya.setText(doc.getJenisDokumenDetail());
+            }
+        }
+
+        if (doc.getMitra() != null) txtTingkatKerjaSama.setText(doc.getMitra());
+        if (doc.getPicBlsdm() != null) cbPicBlsdm.setValue(doc.getPicBlsdm());
+        if (doc.getNomorDokumen() != null) txtNomorDokumenBalai.setText(doc.getNomorDokumen());
+        if (doc.getPic() != null) txtPicMitra.setText(doc.getPic());
+        if (doc.getKontakPic() != null) txtKontakMitra.setText(doc.getKontakPic());
+        if (doc.getTanggalMulai() != null) dpTanggalMulai.setValue(doc.getTanggalMulai());
+        if (doc.getTanggalBerakhir() != null) dpTanggalBerakhir.setValue(doc.getTanggalBerakhir());
+        if (doc.getKeterangan() != null && !doc.getKeterangan().isEmpty()) {
+            txtCatatan.setText(doc.getKeterangan());
+        }
+        if (doc.getFilePath() != null && !doc.getFilePath().isEmpty()) {
+            lblFileName.setText(new File(doc.getFilePath()).getName());
+        }
+        if (doc.getStatus() != null) cbStatus.setValue(doc.getStatus());
     }
 
     @FXML
@@ -129,7 +174,8 @@ public class AddNonPemdaDocumentController {
         }
 
         try {
-            String filePath = selectedFile != null ? uploadFile(selectedFile) : "";
+            String filePath = selectedFile != null ? uploadFile(selectedFile) :
+                    (editingDocument != null ? editingDocument.getFilePath() : "");
 
             String jenisDokumenValue = cbJenisDokumen.getValue();
             if ("Lainnya...".equals(jenisDokumenValue)) {
@@ -149,39 +195,70 @@ public class AddNonPemdaDocumentController {
                 }
             }
 
-            String kategori = "Non-Pemerintah";
             String mitra = txtTingkatKerjaSama.getText().trim();
             String picBlsdm = cbPicBlsdm.getValue();
             String picMitra = txtPicMitra.getText().trim();
             String kontakPic = txtKontakMitra.getText().trim();
+            String catatan = txtCatatan.getText().trim();
 
-            String sql = "INSERT INTO documents (nomor_dokumen, jenis, mitra, kategori, jenis_dokumen_detail, " +
-                    "tanggal_mulai, tanggal_berakhir, pic, kontak_pic, pic_blsdm, file_path, status, keterangan, created_by) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            try (Connection conn = DatabaseConfig.connect()) {
 
-            try (Connection conn = DatabaseConfig.connect();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                // ✅ FIX: Cek mode edit atau tambah
+                if (editingDocument != null) {
+                    // MODE EDIT - UPDATE
+                    String sql = "UPDATE documents SET nomor_dokumen = ?, jenis = ?, mitra = ?, " +
+                            "jenis_dokumen_detail = ?, tanggal_mulai = ?, tanggal_berakhir = ?, " +
+                            "pic = ?, kontak_pic = ?, pic_blsdm = ?, file_path = ?, status = ?, " +
+                            "keterangan = ? WHERE id = ?";
 
-                String nomorDokumen = txtNomorDokumenBalai.getText().trim();
-                if (nomorDokumen.isEmpty()) nomorDokumen = txtNomorDokumenMitra.getText().trim();
+                    PreparedStatement pstmt = conn.prepareStatement(sql);
+                    String nomorDokumen = txtNomorDokumenBalai.getText().trim();
+                    if (nomorDokumen.isEmpty()) nomorDokumen = txtNomorDokumenMitra.getText().trim();
 
-                pstmt.setString(1, nomorDokumen);
-                pstmt.setString(2, jenisPerjanjian);
-                pstmt.setString(3, mitra);
-                pstmt.setString(4, kategori);
-                pstmt.setString(5, jenisDokumenValue);
-                pstmt.setString(6, dpTanggalMulai.getValue() != null ? dpTanggalMulai.getValue().toString() : "");
-                pstmt.setString(7, dpTanggalBerakhir.getValue() != null ? dpTanggalBerakhir.getValue().toString() : "");
-                pstmt.setString(8, picMitra);
-                pstmt.setString(9, kontakPic);
-                pstmt.setString(10, picBlsdm);
-                pstmt.setString(11, filePath);
-                pstmt.setString(12, cbStatus.getValue());
-                pstmt.setString(13, txtCatatan.getText().trim());
-                pstmt.setInt(14, currentUserId);
+                    pstmt.setString(1, nomorDokumen);
+                    pstmt.setString(2, jenisPerjanjian);
+                    pstmt.setString(3, mitra);
+                    pstmt.setString(4, jenisDokumenValue);
+                    pstmt.setString(5, dpTanggalMulai.getValue() != null ? dpTanggalMulai.getValue().toString() : "");
+                    pstmt.setString(6, dpTanggalBerakhir.getValue() != null ? dpTanggalBerakhir.getValue().toString() : "");
+                    pstmt.setString(7, picMitra);
+                    pstmt.setString(8, kontakPic);
+                    pstmt.setString(9, picBlsdm);
+                    pstmt.setString(10, filePath);
+                    pstmt.setString(11, cbStatus.getValue());
+                    pstmt.setString(12, catatan.isEmpty() ? null : catatan);
+                    pstmt.setInt(13, editingDocument.getId());
 
-                pstmt.executeUpdate();
-                showAlert("Sukses!", "Dokumen berhasil disimpan.", Alert.AlertType.INFORMATION);
+                    pstmt.executeUpdate();
+                    showAlert("Sukses!", "Dokumen berhasil diupdate.", Alert.AlertType.INFORMATION);
+
+                } else {
+                    // MODE TAMBAH - INSERT
+                    String sql = "INSERT INTO documents (nomor_dokumen, jenis, mitra, kategori, jenis_dokumen_detail, " +
+                            "tanggal_mulai, tanggal_berakhir, pic, kontak_pic, pic_blsdm, file_path, status, keterangan, created_by) " +
+                            "VALUES (?, ?, ?, 'Non-Pemerintah', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+                    PreparedStatement pstmt = conn.prepareStatement(sql);
+                    String nomorDokumen = txtNomorDokumenBalai.getText().trim();
+                    if (nomorDokumen.isEmpty()) nomorDokumen = txtNomorDokumenMitra.getText().trim();
+
+                    pstmt.setString(1, nomorDokumen);
+                    pstmt.setString(2, jenisPerjanjian);
+                    pstmt.setString(3, mitra);
+                    pstmt.setString(4, jenisDokumenValue);
+                    pstmt.setString(5, dpTanggalMulai.getValue() != null ? dpTanggalMulai.getValue().toString() : "");
+                    pstmt.setString(6, dpTanggalBerakhir.getValue() != null ? dpTanggalBerakhir.getValue().toString() : "");
+                    pstmt.setString(7, picMitra);
+                    pstmt.setString(8, kontakPic);
+                    pstmt.setString(9, picBlsdm);
+                    pstmt.setString(10, filePath);
+                    pstmt.setString(11, cbStatus.getValue());
+                    pstmt.setString(12, catatan.isEmpty() ? null : catatan);
+                    pstmt.setInt(13, currentUserId);
+
+                    pstmt.executeUpdate();
+                    showAlert("Sukses!", "Dokumen berhasil disimpan.", Alert.AlertType.INFORMATION);
+                }
 
                 if (dashboardController != null) {
                     dashboardController.handleDashboard();

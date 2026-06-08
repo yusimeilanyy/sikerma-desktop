@@ -1,6 +1,7 @@
 package com.sikerma.sikerma.controller;
 
 import com.sikerma.sikerma.config.DatabaseConfig;
+import com.sikerma.sikerma.model.Document;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -9,6 +10,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
@@ -43,6 +47,7 @@ public class AddPemdaDocumentController {
     private int currentUserId;
     private File selectedFile;
     private DashboardController dashboardController;
+    private Document editingDocument = null;
 
     private ObservableList<String> kabSulut = FXCollections.observableArrayList(
             "Kab. Minahasa", "Kab. Minahasa Selatan", "Kab. Minahasa Utara",
@@ -74,6 +79,66 @@ public class AddPemdaDocumentController {
 
     public void setDashboardController(DashboardController controller) {
         this.dashboardController = controller;
+    }
+
+    public void setDocumentData(Document doc) {
+        this.editingDocument = doc;
+
+        if (doc.getJenis() != null) {
+            if (doc.getJenis().contains("MoU")) {
+                cbJenisPerjanjian.setValue("MoU (Memorandum of Understanding)");
+            } else if (doc.getJenis().contains("PKS")) {
+                cbJenisPerjanjian.setValue("PKS (Perjanjian Kerja Sama)");
+            }
+        }
+
+        if (doc.getJenisDokumenDetail() != null) {
+            if (cbJenisDokumen.getItems().contains(doc.getJenisDokumenDetail())) {
+                cbJenisDokumen.setValue(doc.getJenisDokumenDetail());
+            } else {
+                cbJenisDokumen.setValue("Lainnya...");
+                boxJenisDokumenLainnya.setVisible(true);
+                boxJenisDokumenLainnya.setManaged(true);
+                lblJenisDokumenLainnya.setVisible(true);
+                lblJenisDokumenLainnya.setManaged(true);
+                txtJenisDokumenLainnya.setText(doc.getJenisDokumenDetail());
+            }
+        }
+
+        if (doc.getMitra() != null) {
+            String mitra = doc.getMitra();
+            if (mitra.startsWith("Pemerintah Provinsi ")) {
+                cbTingkatKerjaSama.setValue("Pemerintah Provinsi");
+                String provinsi = mitra.replace("Pemerintah Provinsi ", "");
+                cbProvinsi.setValue(provinsi);
+                lblProvinsi.setVisible(true);
+                lblProvinsi.setManaged(true);
+                boxProvinsi.setVisible(true);
+                boxProvinsi.setManaged(true);
+            } else {
+                cbTingkatKerjaSama.setValue("Pemerintah Kabupaten/Kota");
+                cbKabKota.setValue(mitra);
+                lblProvinsi.setVisible(true);
+                lblProvinsi.setManaged(true);
+                boxProvinsi.setVisible(true);
+                boxProvinsi.setManaged(true);
+                lblKabKota.setVisible(true);
+                lblKabKota.setManaged(true);
+                boxKabKota.setVisible(true);
+                boxKabKota.setManaged(true);
+            }
+        }
+
+        if (doc.getPicBlsdm() != null) cbPICBlsdm.setValue(doc.getPicBlsdm());
+        if (doc.getNomorDokumen() != null) txtNomorDokumenBalai.setText(doc.getNomorDokumen());
+        if (doc.getPic() != null) txtPICPemda.setText(doc.getPic());
+        if (doc.getKontakPic() != null) txtKontakPIC.setText(doc.getKontakPic());
+        if (doc.getTanggalMulai() != null) dpTanggalMulai.setValue(doc.getTanggalMulai());
+        if (doc.getTanggalBerakhir() != null) dpTanggalBerakhir.setValue(doc.getTanggalBerakhir());
+        if (doc.getKeterangan() != null && !doc.getKeterangan().isEmpty()) {
+            txtCatatan.setText(doc.getKeterangan());
+        }
+        if (doc.getStatus() != null) cbStatus.setValue(doc.getStatus());
     }
 
     @FXML
@@ -130,14 +195,11 @@ public class AddPemdaDocumentController {
     }
 
     private void setupEventHandlers() {
-        // Sembunyikan semua field conditional di awal
         hideConditionalFields();
 
-        // Handle Tingkat Kerja Sama
         cbTingkatKerjaSama.setOnAction(e -> {
             String selected = cbTingkatKerjaSama.getValue();
 
-            // Reset dulu
             hideConditionalFields();
             cbProvinsi.setValue(null);
             cbKabKota.setValue(null);
@@ -145,13 +207,11 @@ public class AddPemdaDocumentController {
 
             if (selected != null) {
                 if ("Pemerintah Provinsi".equals(selected)) {
-                    // Tampilkan hanya Provinsi
                     lblProvinsi.setVisible(true);
                     lblProvinsi.setManaged(true);
                     boxProvinsi.setVisible(true);
                     boxProvinsi.setManaged(true);
                 } else if ("Pemerintah Kabupaten/Kota".equals(selected)) {
-                    // Tampilkan Provinsi DAN Kabupaten/Kota
                     lblProvinsi.setVisible(true);
                     lblProvinsi.setManaged(true);
                     boxProvinsi.setVisible(true);
@@ -164,7 +224,6 @@ public class AddPemdaDocumentController {
             }
         });
 
-        // Handle Provinsi - update Kabupaten/Kota
         cbProvinsi.setOnAction(e -> {
             String provinsi = cbProvinsi.getValue();
             if (provinsi != null && boxKabKota.isVisible()) {
@@ -186,7 +245,6 @@ public class AddPemdaDocumentController {
             }
         });
 
-        // Handle Jenis Dokumen - show/hide text field
         cbJenisDokumen.setOnAction(e -> {
             String selected = cbJenisDokumen.getValue();
             if ("Lainnya...".equals(selected)) {
@@ -206,19 +264,16 @@ public class AddPemdaDocumentController {
     }
 
     private void hideConditionalFields() {
-        // Sembunyikan Provinsi
         lblProvinsi.setVisible(false);
         lblProvinsi.setManaged(false);
         boxProvinsi.setVisible(false);
         boxProvinsi.setManaged(false);
 
-        // Sembunyikan Kabupaten/Kota
         lblKabKota.setVisible(false);
         lblKabKota.setManaged(false);
         boxKabKota.setVisible(false);
         boxKabKota.setManaged(false);
 
-        // Sembunyikan Jenis Dokumen Lainnya
         lblJenisDokumenLainnya.setVisible(false);
         lblJenisDokumenLainnya.setManaged(false);
         boxJenisDokumenLainnya.setVisible(false);
@@ -238,6 +293,21 @@ public class AddPemdaDocumentController {
         if (file != null) {
             selectedFile = file;
             showAlert("Info", "File dipilih: " + file.getName());
+        }
+    }
+
+    // ✅ TAMBAHAN BARU: Method untuk upload file
+    private String uploadFile(File file) {
+        try {
+            String uploadDir = "uploads/";
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
+            String fileName = System.currentTimeMillis() + "_" + file.getName();
+            Files.copy(file.toPath(), uploadPath.resolve(fileName));
+            return uploadPath.resolve(fileName).toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
         }
     }
 
@@ -264,35 +334,81 @@ public class AddPemdaDocumentController {
                     jenisDokumen = txtJenisDokumenLainnya.getText().trim();
                 }
 
-                String sql = "INSERT INTO documents (jenis, mitra, kategori, jenis_dokumen_detail, " +
-                        "pic_blsdm, nomor_dokumen, tanggal_mulai, tanggal_berakhir, status, " +
-                        "pic, kontak_pic, keterangan, created_at) " +
-                        "VALUES (?, ?, 'Pemerintah Daerah', ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                // ✅ TAMBAHAN BARU: Upload file jika ada
+                String filePath = "";
+                if (selectedFile != null) {
+                    filePath = uploadFile(selectedFile);
+                } else if (editingDocument != null) {
+                    filePath = editingDocument.getFilePath();
+                }
 
                 Connection conn = DatabaseConfig.connect();
-                PreparedStatement pstmt = conn.prepareStatement(sql);
 
-                pstmt.setString(1, cbJenisPerjanjian.getValue());
-                pstmt.setString(2, mitra);
-                pstmt.setString(3, jenisDokumen);
-                pstmt.setString(4, cbPICBlsdm.getValue());
-                pstmt.setString(5, txtNomorDokumenBalai.getText());
+                if (editingDocument != null) {
+                    // MODE EDIT - UPDATE (tambah file_path)
+                    String sql = "UPDATE documents SET jenis = ?, mitra = ?, jenis_dokumen_detail = ?, " +
+                            "pic_blsdm = ?, nomor_dokumen = ?, tanggal_mulai = ?, tanggal_berakhir = ?, " +
+                            "status = ?, pic = ?, kontak_pic = ?, keterangan = ?, file_path = ? WHERE id = ?";
 
-                LocalDate tglMulai = dpTanggalMulai.getValue();
-                pstmt.setDate(6, tglMulai != null ? java.sql.Date.valueOf(tglMulai) : null);
+                    PreparedStatement pstmt = conn.prepareStatement(sql);
+                    pstmt.setString(1, cbJenisPerjanjian.getValue());
+                    pstmt.setString(2, mitra);
+                    pstmt.setString(3, jenisDokumen);
+                    pstmt.setString(4, cbPICBlsdm.getValue());
+                    pstmt.setString(5, txtNomorDokumenBalai.getText());
 
-                LocalDate tglBerakhir = dpTanggalBerakhir.getValue();
-                pstmt.setDate(7, tglBerakhir != null ? java.sql.Date.valueOf(tglBerakhir) : null);
+                    LocalDate tglMulai = dpTanggalMulai.getValue();
+                    pstmt.setDate(6, tglMulai != null ? java.sql.Date.valueOf(tglMulai) : null);
 
-                pstmt.setString(8, cbStatus.getValue());
-                pstmt.setString(9, txtPICPemda.getText());
-                pstmt.setString(10, txtKontakPIC.getText());
-                pstmt.setString(11, txtPemilik.getText());
+                    LocalDate tglBerakhir = dpTanggalBerakhir.getValue();
+                    pstmt.setDate(7, tglBerakhir != null ? java.sql.Date.valueOf(tglBerakhir) : null);
 
-                pstmt.executeUpdate();
+                    pstmt.setString(8, cbStatus.getValue());
+                    pstmt.setString(9, txtPICPemda.getText());
+                    pstmt.setString(10, txtKontakPIC.getText());
+
+                    String catatan = txtCatatan.getText().trim();
+                    pstmt.setString(11, catatan.isEmpty() ? null : catatan);
+                    pstmt.setString(12, filePath); // ✅ TAMBAHAN BARU
+                    pstmt.setInt(13, editingDocument.getId());
+
+                    pstmt.executeUpdate();
+                    showAlert("Sukses", "Dokumen berhasil diupdate!");
+
+                } else {
+                    // MODE TAMBAH - INSERT (tambah file_path)
+                    String sql = "INSERT INTO documents (jenis, mitra, kategori, jenis_dokumen_detail, " +
+                            "pic_blsdm, nomor_dokumen, tanggal_mulai, tanggal_berakhir, status, " +
+                            "pic, kontak_pic, keterangan, file_path, created_at) " +
+                            "VALUES (?, ?, 'Pemerintah Daerah', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+
+                    PreparedStatement pstmt = conn.prepareStatement(sql);
+                    pstmt.setString(1, cbJenisPerjanjian.getValue());
+                    pstmt.setString(2, mitra);
+                    pstmt.setString(3, jenisDokumen);
+                    pstmt.setString(4, cbPICBlsdm.getValue());
+                    pstmt.setString(5, txtNomorDokumenBalai.getText());
+
+                    LocalDate tglMulai = dpTanggalMulai.getValue();
+                    pstmt.setDate(6, tglMulai != null ? java.sql.Date.valueOf(tglMulai) : null);
+
+                    LocalDate tglBerakhir = dpTanggalBerakhir.getValue();
+                    pstmt.setDate(7, tglBerakhir != null ? java.sql.Date.valueOf(tglBerakhir) : null);
+
+                    pstmt.setString(8, cbStatus.getValue());
+                    pstmt.setString(9, txtPICPemda.getText());
+                    pstmt.setString(10, txtKontakPIC.getText());
+
+                    String catatan = txtCatatan.getText().trim();
+                    pstmt.setString(11, catatan.isEmpty() ? null : catatan);
+                    pstmt.setString(12, filePath); // ✅ TAMBAHAN BARU
+
+                    pstmt.executeUpdate();
+                    showAlert("Sukses", "Dokumen berhasil disimpan!");
+                }
+
                 conn.close();
 
-                showAlert("Sukses", "Dokumen berhasil disimpan!");
                 if (dashboardController != null) {
                     dashboardController.handleDashboard();
                 }

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.sikerma.sikerma.controller.UserManagementController"
+            style="-fx-background-color: #f8fafc;">
+
+
+    <!-- MAIN CONTENT -->
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-width: 0;">
+            <VBox spacing="25" style="-fx-padding: 30 40 40 40; -fx-background-color: #f8fafc;">
+
+                <!-- Header -->
+                <HBox alignment="CENTER_LEFT" spacing="20">
+                    <VBox spacing="5">
+                        <Label text="Manajemen Pengguna" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                        <Label text="Kelola akun pengguna sistem SIKERMA"
+                               style="-fx-font-size: 14px; -fx-text-fill: #64748b;" wrapText="true"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="+ Tambah User" onAction="#handleTambahUser"
+                            style="-fx-background-color: #0d9488; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 12 24; -fx-cursor: hand; -fx-font-size: 14px;"/>
+                </HBox>
+
+                <!-- Table Card -->
+                <VBox spacing="20" style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24;">
+
+                    <!-- Table -->
+                    <TableView fx:id="tableUsers" VBox.vgrow="ALWAYS"
+                               style="-fx-background-color: transparent; -fx-border-width: 0;">
+                        <columns>
+                            <TableColumn fx:id="colUsername" text="Username" prefWidth="120" resizable="false"/>
+                            <TableColumn fx:id="colEmail" text="Email" prefWidth="180" resizable="false"/>
+                            <TableColumn fx:id="colNamaLengkap" text="Nama Lengkap" prefWidth="210" resizable="false"/>
+                            <TableColumn fx:id="colRole" text="Role" prefWidth="120" resizable="false"/>
+                            <TableColumn fx:id="colStatus" text="Status" prefWidth="80" resizable="false"/>
+                            <TableColumn fx:id="colDibuat" text="Dibuat" prefWidth="100" resizable="false"/>
+                            <TableColumn fx:id="colAksi" text="Aksi" prefWidth="80" resizable="false"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                    </TableView>
+
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>
