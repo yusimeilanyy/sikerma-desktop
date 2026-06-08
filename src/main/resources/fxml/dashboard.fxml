@@ -41,7 +41,6 @@
                 <Button fx:id="btnNotifikasi" text="Notifikasi"
                         style="-fx-background-color: transparent; -fx-text-fill: #475569; -fx-padding: 12 16; -fx-cursor: hand; -fx-alignment: CENTER_LEFT;"
                         maxWidth="Infinity" onAction="#handleNotifications"/>
-                <!-- ✅ TAMBAHKAN fx:id="btnUser" -->
                 <Button fx:id="btnUser" text="User"
                         style="-fx-background-color: transparent; -fx-text-fill: #475569; -fx-padding: 12 16; -fx-cursor: hand; -fx-alignment: CENTER_LEFT;"
                         maxWidth="Infinity" onAction="#handleUsers"/>
@@ -99,7 +98,8 @@
                 </HBox>
 
                 <HBox spacing="20">
-                    <VBox style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24; -fx-min-width: 200;" HBox.hgrow="ALWAYS">
+                    <!-- ✅ CARD TOTAL MoU (Ditambahkan fx:id dan onMouseClicked) -->
+                    <VBox fx:id="cardMou" onMouseClicked="#handleCardMouClick" style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24; -fx-min-width: 200; -fx-cursor: hand;" HBox.hgrow="ALWAYS">
                         <HBox alignment="CENTER_LEFT" spacing="15">
                             <StackPane style="-fx-background-color: #eff6ff; -fx-background-radius: 12; -fx-pref-width: 50; -fx-pref-height: 50;">
                                 <Text fill="#3b82f6" text="M" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
@@ -111,7 +111,9 @@
                         </HBox>
                         <Label fx:id="lblMouActive" text="3 aktif" style="-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-padding: 12 0 0 65;"/>
                     </VBox>
-                    <VBox style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24; -fx-min-width: 200;" HBox.hgrow="ALWAYS">
+
+                    <!-- ✅ CARD TOTAL PKS (Ditambahkan fx:id dan onMouseClicked) -->
+                    <VBox fx:id="cardPks" onMouseClicked="#handleCardPksClick" style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24; -fx-min-width: 200; -fx-cursor: hand;" HBox.hgrow="ALWAYS">
                         <HBox alignment="CENTER_LEFT" spacing="15">
                             <StackPane style="-fx-background-color: #eff6ff; -fx-background-radius: 12; -fx-pref-width: 50; -fx-pref-height: 50;">
                                 <Text fill="#3b82f6" text="P" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
@@ -123,7 +125,9 @@
                         </HBox>
                         <Label fx:id="lblPksActive" text="2 aktif" style="-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-padding: 12 0 0 65;"/>
                     </VBox>
-                    <VBox style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24; -fx-min-width: 200;" HBox.hgrow="ALWAYS">
+
+                    <!-- ✅ CARD DOKUMEN AKTIF (Ditambahkan fx:id dan onMouseClicked) -->
+                    <VBox fx:id="cardAktif" onMouseClicked="#handleCardAktifClick" style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24; -fx-min-width: 200; -fx-cursor: hand;" HBox.hgrow="ALWAYS">
                         <HBox alignment="CENTER_LEFT" spacing="15">
                             <StackPane style="-fx-background-color: #f0fdf4; -fx-background-radius: 12; -fx-pref-width: 50; -fx-pref-height: 50;">
                                 <Text fill="#22c55e" text="✓" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
@@ -135,7 +139,9 @@
                         </HBox>
                         <Label fx:id="lblActiveDetail" text="5 aktif dari 17 dokumen" style="-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-padding: 12 0 0 65;"/>
                     </VBox>
-                    <VBox style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24; -fx-min-width: 200;" HBox.hgrow="ALWAYS">
+
+                    <!-- ✅ CARD DOKUMEN KADALUARSA (Ditambahkan fx:id dan onMouseClicked) -->
+                    <VBox fx:id="cardKadaluarsa" onMouseClicked="#handleCardKadaluarsaClick" style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24; -fx-min-width: 200; -fx-cursor: hand;" HBox.hgrow="ALWAYS">
                         <HBox alignment="CENTER_LEFT" spacing="15">
                             <StackPane style="-fx-background-color: #fef2f2; -fx-background-radius: 12; -fx-pref-width: 50; -fx-pref-height: 50;">
                                 <Text fill="#ef4444" text="!" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
@@ -167,13 +173,14 @@
                     <TableView fx:id="tableDocuments" VBox.vgrow="ALWAYS"
                                style="-fx-background-color: transparent; -fx-border-width: 0; -fx-hbar-policy: NEVER; -fx-vbar-policy: NEVER;">
                         <columns>
-                            <TableColumn fx:id="colNo" text="No" prefWidth="31" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colNo" text="No" prefWidth="50" resizable="false" reorderable="false"/>
                             <TableColumn fx:id="colJenis" text="Jenis" prefWidth="80" resizable="false" reorderable="false"/>
-                            <TableColumn fx:id="colNomor" text="Nomor Dokumen" prefWidth="150" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colNomor" text="Nomor Dokumen" prefWidth="130" resizable="false" reorderable="false"/>
                             <TableColumn fx:id="colMitra" text="Mitra" prefWidth="180" resizable="false" reorderable="false"/>
                             <TableColumn fx:id="colTanggalMulai" text="Tanggal Mulai" prefWidth="134" resizable="false" reorderable="false"/>
                             <TableColumn fx:id="colTanggal" text="Tanggal Berakhir" prefWidth="134" resizable="false" reorderable="false"/>
                             <TableColumn fx:id="colStatus" text="Status" prefWidth="150" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colAksi" text="Aksi" prefWidth="150" resizable="false" reorderable="false"/>
                         </columns>
                     </TableView>
 

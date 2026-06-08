@@ -281,11 +281,20 @@ public class UserManagementController {
         });
     }
 
-    // ✅ PERBAIKAN: Panggil handleDashboard() dari dashboardController yang sudah ada
     @FXML
     private void handleDashboard() {
-        if (dashboardController != null) {
-            dashboardController.handleDashboard();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard.fxml"));
+            Parent root = loader.load();
+
+            DashboardController controller = loader.getController();
+            controller.setUserData(currentUserId, "Administrator Sistem", "ADMIN");
+
+            if (dashboardController != null && dashboardController.getMainLayout() != null) {
+                dashboardController.getMainLayout().setCenter(root);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
