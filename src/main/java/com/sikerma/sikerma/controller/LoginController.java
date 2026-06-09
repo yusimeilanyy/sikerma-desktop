@@ -28,14 +28,38 @@ public class LoginController {
     private Label lblMessage;
 
     @FXML
+    public void initialize() {
+        if (txtUsername != null) {
+            txtUsername.requestFocus();
+        }
+
+        if (txtUsername != null) {
+            txtUsername.textProperty().addListener((observable, oldValue, newValue) -> {
+                clearErrorMessage();
+            });
+        }
+
+        if (txtPassword != null) {
+            txtPassword.textProperty().addListener((observable, oldValue, newValue) -> {
+                clearErrorMessage();
+            });
+        }
+    }
+
+    private void clearErrorMessage() {
+        if (lblMessage != null) {
+            lblMessage.setText("");
+        }
+    }
+
+    @FXML
     public void handleLogin() {
-        String username = txtUsername.getText();
-        String password = txtPassword.getText();
+        String username = txtUsername.getText().trim();
+        String password = txtPassword.getText().trim();
 
         // 1. Validasi input kosong
         if (username.isEmpty() || password.isEmpty()) {
-            lblMessage.setText("⚠️ Username dan Password harus diisi!");
-            lblMessage.setStyle("-fx-text-fill: red;");
+            showError("⚠️ Username dan Password harus diisi!");
             return;
         }
 
@@ -55,21 +79,37 @@ public class LoginController {
                 String role = rs.getString("role");
                 int userId = rs.getInt("id");
 
-                showAlert("Login Berhasil!", "Selamat datang, " + fullName + "!", Alert.AlertType.INFORMATION);
+                // Show success message briefly
+                showSuccess("✅ Login berhasil! Selamat datang, " + fullName);
 
+                // Close login stage
                 Stage loginStage = (Stage) txtUsername.getScene().getWindow();
                 loginStage.close();
 
+                // Open dashboard
                 openDashboard(fullName, role, userId);
 
             } else {
-                lblMessage.setText("❌ Username atau Password salah!");
-                lblMessage.setStyle("-fx-text-fill: red;");
+                showError("❌ Username atau Password salah!");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            lblMessage.setText("❌ Error: " + e.getMessage());
+            showError("❌ Error: " + e.getMessage());
+        }
+    }
+
+    private void showError(String message) {
+        if (lblMessage != null) {
+            lblMessage.setText(message);
+            lblMessage.setStyle("-fx-text-fill: #DC2626; -fx-font-weight: 600;");
+        }
+    }
+
+    private void showSuccess(String message) {
+        if (lblMessage != null) {
+            lblMessage.setText(message);
+            lblMessage.setStyle("-fx-text-fill: #16A34A; -fx-font-weight: 600;");
         }
     }
 
@@ -84,18 +124,18 @@ public class LoginController {
     private void openDashboard(String fullName, String role, int userId) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard.fxml"));
-            BorderPane root = loader.load(); // ✅ Ubah dari Parent ke BorderPane
+            BorderPane root = loader.load();
 
-            Scene scene = new Scene(root, 1200, 750);
+            Scene scene = new Scene(root, 1400, 800);
 
             DashboardController controller = loader.getController();
             controller.setUserData(userId, fullName, role);
-
             controller.setMainLayout(root);
 
             Stage stage = new Stage();
             stage.setTitle("Dashboard SIKERMA - " + role.toUpperCase());
             stage.setScene(scene);
+            stage.setMaximized(true); // Fullscreen
             stage.show();
 
         } catch (Exception e) {

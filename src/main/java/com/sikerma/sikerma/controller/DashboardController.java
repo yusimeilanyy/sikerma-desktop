@@ -65,14 +65,12 @@ public class DashboardController {
     @FXML private TableColumn<Document, LocalDate> colTanggalMulai;
     @FXML private TableColumn<Document, LocalDate> colTanggal;
     @FXML private TableColumn<Document, String> colStatus;
-    @FXML private TableColumn<Document, Void> colAksi;
 
     @FXML private Button btnDashboard;
     @FXML private Button btnTambah;
     @FXML private Button btnSemuaDokumen;
-    @FXML private Button btnPerpanjangan;
-    @FXML private Button btnNotifikasi;
     @FXML private Button btnUser;
+    @FXML private Button btnTindakLanjut;
     @FXML private Button btnPage1;
     @FXML private Button btnPage2;
     @FXML private Button btnPage3;
@@ -87,10 +85,10 @@ public class DashboardController {
     @FXML private VBox cardAktif;
     @FXML private VBox cardKadaluarsa;
 
-    // ✅ PERBAIKAN: Tambahkan kedua variabel
     private ObservableList<Document> documentList = FXCollections.observableArrayList();
     private ObservableList<Document> allDocumentsForChart = FXCollections.observableArrayList();
     private int currentUserId;
+    private String currentUserRole;
     private int currentPage = 1;
     private int totalPages = 1;
     private int itemsPerPage = 5;
@@ -100,8 +98,21 @@ public class DashboardController {
 
     public void setUserData(int userId, String userName, String role) {
         this.currentUserId = userId;
+        this.currentUserRole = role;
         lblUserName.setText(userName);
         lblUserRole.setText(role.toUpperCase());
+
+        // Sembunyikan menu User dan Tindak Lanjut untuk Staff
+        if (role != null && (role.equalsIgnoreCase("staff") || role.equalsIgnoreCase("user"))) {
+            if (btnUser != null) {
+                btnUser.setVisible(false);
+                btnUser.setManaged(false);
+            }
+            if (btnTindakLanjut != null) {
+                btnTindakLanjut.setVisible(false);
+                btnTindakLanjut.setManaged(false);
+            }
+        }
 
         initializeComboBox();
         initializeTable();
@@ -110,6 +121,13 @@ public class DashboardController {
 
     public void setMainLayout(BorderPane layout) {
         this.mainLayout = layout;
+    }
+
+    public void refreshDashboardData() {
+        currentPage = 1;
+        activeCardFilter = null;
+        resetCardStyles();
+        loadDashboardData();
     }
 
     private void initializeComboBox() {
@@ -150,7 +168,6 @@ public class DashboardController {
         colTanggalMulai.setResizable(false);
         colTanggal.setResizable(false);
         colStatus.setResizable(false);
-        colAksi.setResizable(false);
 
         colNo.setCellFactory(column -> new TableCell<>() {
             @Override
@@ -282,67 +299,6 @@ public class DashboardController {
             }
         });
 
-        colAksi.setCellFactory(column -> new TableCell<>() {
-            private final Button btnPerpanjang = new Button("Perpanjang");
-            private final Button btnRiwayat = new Button("Riwayat");
-            private final VBox buttonsPane = new VBox(5, btnPerpanjang, btnRiwayat);
-            private final Label lblDash = new Label("-");
-
-            {
-                btnPerpanjang.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; " +
-                        "-fx-background-radius: 6; -fx-padding: 5 10; -fx-font-weight: bold; " +
-                        "-fx-font-size: 11px; -fx-cursor: hand; -fx-min-width: 130;");
-                btnRiwayat.setStyle("-fx-background-color: #06b6d4; -fx-text-fill: white; " +
-                        "-fx-background-radius: 6; -fx-padding: 5 10; -fx-font-weight: bold; " +
-                        "-fx-font-size: 11px; -fx-cursor: hand; -fx-min-width: 130;");
-
-                btnPerpanjang.setMaxWidth(Double.MAX_VALUE);
-                btnRiwayat.setMaxWidth(Double.MAX_VALUE);
-
-                lblDash.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 14px; -fx-font-weight: bold;");
-                lblDash.setAlignment(Pos.CENTER);
-                lblDash.setMaxWidth(Double.MAX_VALUE);
-
-                btnPerpanjang.setOnAction(e -> {
-                    int rowIndex = getIndex();
-                    if (rowIndex >= 0 && rowIndex < tableDocuments.getItems().size()) {
-                        Document doc = tableDocuments.getItems().get(rowIndex);
-                        showPerpanjangDialog(doc);
-                    }
-                });
-
-                btnRiwayat.setOnAction(e -> {
-                    int rowIndex = getIndex();
-                    if (rowIndex >= 0 && rowIndex < tableDocuments.getItems().size()) {
-                        Document doc = tableDocuments.getItems().get(rowIndex);
-                        showRiwayatDialog(doc);
-                    }
-                });
-            }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
-                    setGraphic(null);
-                } else {
-                    Document doc = getTableRow().getItem();
-                    LocalDate today = LocalDate.now();
-
-                    boolean isExpired = doc.getTanggalBerakhir() != null &&
-                            doc.getTanggalBerakhir().isBefore(today);
-
-                    if (isExpired) {
-                        buttonsPane.setAlignment(Pos.CENTER);
-                        buttonsPane.setPadding(new Insets(2, 0, 2, 0));
-                        setGraphic(buttonsPane);
-                    } else {
-                        setGraphic(lblDash);
-                    }
-                }
-            }
-        });
-
         tableDocuments.setFixedCellSize(90);
         tableDocuments.setStyle("-fx-background-color: transparent; -fx-border-width: 0;");
     }
@@ -381,6 +337,9 @@ public class DashboardController {
     }
 
     private void loadDashboardData() {
+        allDocumentsForChart.clear();
+        documentList.clear();
+
         String countSql = "SELECT COUNT(*) FROM documents WHERE is_deleted = 0";
         int totalItems = 0;
 
@@ -410,10 +369,6 @@ public class DashboardController {
             pstmt.setInt(2, offset);
             ResultSet rs = pstmt.executeQuery();
 
-            documentList.clear();
-            int totalMou = 0, totalPks = 0, active = 0, expired = 0, mendesak = 0, peringatan = 0;
-            LocalDate today = LocalDate.now();
-
             while (rs.next()) {
                 Document doc = new Document();
                 doc.setId(rs.getInt("id"));
@@ -428,9 +383,18 @@ public class DashboardController {
 
                 doc.setStatus(rs.getString("status"));
                 documentList.add(doc);
+            }
 
-                if ("MOU".equals(doc.getJenis())) totalMou++;
-                if ("PKS".equals(doc.getJenis())) totalPks++;
+            loadAllDocumentsForChart();
+
+            int totalMou = 0, totalPks = 0, active = 0, expired = 0, mendesak = 0, peringatan = 0;
+            LocalDate today = LocalDate.now();
+
+            for (Document doc : allDocumentsForChart) {
+                String jenis = doc.getJenis() != null ? doc.getJenis().toUpperCase() : "";
+
+                if (jenis.contains("MOU")) totalMou++;
+                if (jenis.contains("PKS")) totalPks++;
 
                 if (doc.getTanggalBerakhir() != null && doc.getTanggalBerakhir().isBefore(today)) {
                     expired++;
@@ -469,8 +433,6 @@ public class DashboardController {
             tableDocuments.setItems(documentList);
             updatePaginationButtons();
 
-            // ✅ Load semua dokumen untuk chart
-            loadAllDocumentsForChart();
             initializeCharts();
             updateCharts();
 
@@ -480,6 +442,9 @@ public class DashboardController {
     }
 
     private void initializeCharts() {
+        if (barChartMoUPks != null) barChartMoUPks.getData().clear();
+        if (lineChartTren != null) lineChartTren.getData().clear();
+
         cbTahun.getItems().clear();
         int currentYear = LocalDate.now().getYear();
         for (int year = currentYear - 2; year <= currentYear + 2; year++) {
@@ -499,7 +464,22 @@ public class DashboardController {
         barChartMoUPks.setAnimated(false);
         barChartMoUPks.setStyle("-fx-background-color: transparent;");
         barChartMoUPks.setLegendSide(javafx.geometry.Side.BOTTOM);
-        barChartMoUPks.lookup(".chart-legend").setStyle("-fx-background-color: transparent; -fx-padding: 10 0 0 0;");
+        barChartMoUPks.setBarGap(2);
+        barChartMoUPks.setCategoryGap(20);
+
+        Node legend = barChartMoUPks.lookup(".chart-legend");
+        if (legend != null) {
+            legend.setStyle("-fx-background-color: transparent; -fx-padding: 10 0 0 0; -fx-font-size: 11px;");
+        }
+
+        CategoryAxis xAxis = (CategoryAxis) barChartMoUPks.getXAxis();
+        xAxis.setStyle("-fx-font-size: 11px; -fx-text-fill: #64748b;");
+        xAxis.setTickLabelFill(javafx.scene.paint.Color.web("#64748b"));
+
+        NumberAxis yAxis = (NumberAxis) barChartMoUPks.getYAxis();
+        yAxis.setStyle("-fx-font-size: 11px; -fx-text-fill: #64748b;");
+        yAxis.setTickLabelFill(javafx.scene.paint.Color.web("#64748b"));
+        yAxis.setTickUnit(1);
     }
 
     private void setupLineChart() {
@@ -510,9 +490,19 @@ public class DashboardController {
         xAxis.getCategories().clear();
         xAxis.getCategories().addAll("Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
                 "Jul", "Agu", "Sep", "Okt", "Nov", "Des");
+        xAxis.setStyle("-fx-font-size: 11px;");
+        xAxis.setTickLabelFill(javafx.scene.paint.Color.web("#64748b"));
+
+        NumberAxis yAxis = (NumberAxis) lineChartTren.getYAxis();
+        yAxis.setStyle("-fx-font-size: 11px;");
+        yAxis.setTickLabelFill(javafx.scene.paint.Color.web("#64748b"));
+        yAxis.setTickUnit(1);
 
         lineChartTren.setLegendSide(javafx.geometry.Side.BOTTOM);
-        lineChartTren.lookup(".chart-legend").setStyle("-fx-background-color: transparent; -fx-padding: 10 0 0 0;");
+        Node legend = lineChartTren.lookup(".chart-legend");
+        if (legend != null) {
+            legend.setStyle("-fx-background-color: transparent; -fx-padding: 10 0 0 0; -fx-font-size: 11px;");
+        }
     }
 
     private void loadAllDocumentsForChart() {
@@ -550,14 +540,14 @@ public class DashboardController {
         int mouAktif = 0, mouExpired = 0, pksAktif = 0, pksExpired = 0;
         LocalDate today = LocalDate.now();
 
-        // ✅ Gunakan allDocumentsForChart
         for (Document doc : allDocumentsForChart) {
             boolean isExpired = doc.getTanggalBerakhir() != null && doc.getTanggalBerakhir().isBefore(today);
+            String jenis = doc.getJenis() != null ? doc.getJenis().toUpperCase() : "";
 
-            if ("MOU".equals(doc.getJenis())) {
+            if (jenis.contains("MOU")) {
                 if (isExpired) mouExpired++;
                 else mouAktif++;
-            } else if ("PKS".equals(doc.getJenis())) {
+            } else if (jenis.contains("PKS")) {
                 if (isExpired) pksExpired++;
                 else pksAktif++;
             }
@@ -580,13 +570,44 @@ public class DashboardController {
     }
 
     private void applyBarChartColors() {
-        barChartMoUPks.getData().get(0).getNode().setStyle(
-                "-fx-bar-fill: #14b8a6; -fx-background-color: #14b8a6;"
-        );
+        final String TEAL_COLOR = "#07b8af";
+        final String TEAL_SHADOW = "rgba(7, 184, 175, 0.3)";
+        final String ORANGE_COLOR = "#FF6B35";
+        final String ORANGE_SHADOW = "rgba(255, 107, 53, 0.3)";
 
-        barChartMoUPks.getData().get(1).getNode().setStyle(
-                "-fx-bar-fill: #fb923c; -fx-background-color: #fb923c;"
-        );
+        if (barChartMoUPks.getData().size() > 0) {
+            barChartMoUPks.getData().get(0).getNode().setStyle(
+                    "-fx-bar-fill: " + TEAL_COLOR + "; -fx-background-color: " + TEAL_COLOR + ";"
+            );
+
+            for (XYChart.Data<String, Number> data : barChartMoUPks.getData().get(0).getData()) {
+                Node node = data.getNode();
+                if (node != null) {
+                    node.setStyle(
+                            "-fx-background-color: " + TEAL_COLOR + "; " +
+                                    "-fx-background-radius: 8 8 0 0; " +
+                                    "-fx-effect: dropshadow(gaussian, " + TEAL_SHADOW + ", 8, 0, 0, 2);"
+                    );
+                }
+            }
+        }
+
+        if (barChartMoUPks.getData().size() > 1) {
+            barChartMoUPks.getData().get(1).getNode().setStyle(
+                    "-fx-bar-fill: " + ORANGE_COLOR + "; -fx-background-color: " + ORANGE_COLOR + ";"
+            );
+
+            for (XYChart.Data<String, Number> data : barChartMoUPks.getData().get(1).getData()) {
+                Node node = data.getNode();
+                if (node != null) {
+                    node.setStyle(
+                            "-fx-background-color: " + ORANGE_COLOR + "; " +
+                                    "-fx-background-radius: 8 8 0 0; " +
+                                    "-fx-effect: dropshadow(gaussian, " + ORANGE_SHADOW + ", 8, 0, 0, 2);"
+                    );
+                }
+            }
+        }
     }
 
     private void updateLineChart() {
@@ -598,13 +619,13 @@ public class DashboardController {
         int[] mouPerMonth = new int[12];
         int[] pksPerMonth = new int[12];
 
-        // ✅ PERBAIKAN: Gunakan allDocumentsForChart, bukan documentList
         for (Document doc : allDocumentsForChart) {
             if (doc.getTanggalMulai() != null && doc.getTanggalMulai().getYear() == year) {
                 int month = doc.getTanggalMulai().getMonthValue() - 1;
-                if ("MOU".equals(doc.getJenis())) {
+                String jenis = doc.getJenis() != null ? doc.getJenis().toUpperCase() : "";
+                if (jenis.contains("MOU")) {
                     mouPerMonth[month]++;
-                } else if ("PKS".equals(doc.getJenis())) {
+                } else if (jenis.contains("PKS")) {
                     pksPerMonth[month]++;
                 }
             }
@@ -629,19 +650,59 @@ public class DashboardController {
     }
 
     private void applyLineChartColors() {
-        lineChartTren.getData().get(0).getNode().setStyle(
-                "-fx-stroke: #14b8a6; -fx-stroke-width: 3px;"
-        );
+        final String TEAL_COLOR = "#07b8af";
+        final String TEAL_FILL = "rgba(7, 184, 175, 0.15)";
+        final String TEAL_SHADOW = "rgba(7, 184, 175, 0.4)";
+        final String ORANGE_COLOR = "#FF6B35";
+        final String ORANGE_FILL = "rgba(255, 107, 53, 0.15)";
+        final String ORANGE_SHADOW = "rgba(255, 107, 53, 0.4)";
 
-        lineChartTren.getData().get(1).getNode().setStyle(
-                "-fx-stroke: #fb923c; -fx-stroke-width: 3px;"
-        );
+        if (lineChartTren.getData().size() > 0) {
+            Node lineNodeMoU = lineChartTren.getData().get(0).getNode();
+            if (lineNodeMoU != null) {
+                lineNodeMoU.setStyle(
+                        "-fx-stroke: " + TEAL_COLOR + "; " +
+                                "-fx-stroke-width: 3px; " +
+                                "-fx-fill: " + TEAL_FILL + ";"
+                );
+            }
 
-        for (XYChart.Series<String, Number> series : lineChartTren.getData()) {
-            series.getNode().lookup(".chart-series-line").setStyle(
-                    "-fx-stroke: " + (series.getName().equals("MoU Baru") ? "#14b8a6" : "#fb923c") +
-                            "; -fx-stroke-width: 3px;"
-            );
+            for (XYChart.Data<String, Number> data : lineChartTren.getData().get(0).getData()) {
+                Node node = data.getNode();
+                if (node != null) {
+                    node.setStyle(
+                            "-fx-background-color: " + TEAL_COLOR + ", white; " +
+                                    "-fx-background-insets: 0, 2; " +
+                                    "-fx-background-radius: 5px; " +
+                                    "-fx-padding: 5px; " +
+                                    "-fx-effect: dropshadow(gaussian, " + TEAL_SHADOW + ", 4, 0, 0, 1);"
+                    );
+                }
+            }
+        }
+
+        if (lineChartTren.getData().size() > 1) {
+            Node lineNodePKS = lineChartTren.getData().get(1).getNode();
+            if (lineNodePKS != null) {
+                lineNodePKS.setStyle(
+                        "-fx-stroke: " + ORANGE_COLOR + "; " +
+                                "-fx-stroke-width: 3px; " +
+                                "-fx-fill: " + ORANGE_FILL + ";"
+                );
+            }
+
+            for (XYChart.Data<String, Number> data : lineChartTren.getData().get(1).getData()) {
+                Node node = data.getNode();
+                if (node != null) {
+                    node.setStyle(
+                            "-fx-background-color: " + ORANGE_COLOR + ", white; " +
+                                    "-fx-background-insets: 0, 2; " +
+                                    "-fx-background-radius: 5px; " +
+                                    "-fx-padding: 5px; " +
+                                    "-fx-effect: dropshadow(gaussian, " + ORANGE_SHADOW + ", 4, 0, 0, 1);"
+                    );
+                }
+            }
         }
     }
 
@@ -651,24 +712,24 @@ public class DashboardController {
         return months[month];
     }
 
-    // ✅ PERBAIKAN: Gunakan allDocumentsForChart untuk menghitung total
     private int getMouActiveCount() {
         int count = 0;
         LocalDate today = LocalDate.now();
         for (Document doc : allDocumentsForChart) {
-            if ("MOU".equals(doc.getJenis()) && doc.getTanggalBerakhir() != null && !doc.getTanggalBerakhir().isBefore(today)) {
+            String jenis = doc.getJenis() != null ? doc.getJenis().toUpperCase() : "";
+            if (jenis.contains("MOU") && doc.getTanggalBerakhir() != null && !doc.getTanggalBerakhir().isBefore(today)) {
                 count++;
             }
         }
         return count;
     }
 
-    // ✅ PERBAIKAN: Gunakan allDocumentsForChart untuk menghitung total
     private int getPksActiveCount() {
         int count = 0;
         LocalDate today = LocalDate.now();
         for (Document doc : allDocumentsForChart) {
-            if ("PKS".equals(doc.getJenis()) && doc.getTanggalBerakhir() != null && !doc.getTanggalBerakhir().isBefore(today)) {
+            String jenis = doc.getJenis() != null ? doc.getJenis().toUpperCase() : "";
+            if (jenis.contains("PKS") && doc.getTanggalBerakhir() != null && !doc.getTanggalBerakhir().isBefore(today)) {
                 count++;
             }
         }
@@ -700,6 +761,7 @@ public class DashboardController {
     @FXML
     public void handleDashboard() {
         currentPage = 1;
+        activeCardFilter = null;
 
         if (mainLayout != null) {
             try {
@@ -707,7 +769,7 @@ public class DashboardController {
                 Parent root = loader.load();
 
                 DashboardController controller = loader.getController();
-                controller.setUserData(currentUserId, lblUserName.getText(), lblUserRole.getText());
+                controller.setUserData(currentUserId, lblUserName.getText(), currentUserRole);
 
                 if (root instanceof BorderPane) {
                     controller.setMainLayout((BorderPane) root);
@@ -728,40 +790,21 @@ public class DashboardController {
 
     @FXML
     private void handleAddDocument() {
-        ChoiceDialog<String> dialog = new ChoiceDialog<>("Pemerintah Daerah",
-                "Pemerintah Daerah", "Non-Pemerintah Daerah");
-        dialog.setTitle("Pilih Jenis Dokumen");
-        dialog.setHeaderText("Silakan pilih jenis mitra dokumen:");
-        dialog.setContentText("Jenis Mitra:");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/add_document_tabs.fxml"));
+            Parent formRoot = loader.load();
 
-        Optional<String> result = dialog.showAndWait();
+            AddDocumentTabsController controller = loader.getController();
+            controller.setCurrentUserId(currentUserId);
+            controller.setDashboardController(this);
 
-        if (result.isPresent()) {
-            try {
-                String jenis = result.get();
-                String fxmlFile = jenis.equals("Pemerintah Daerah") ?
-                        "/fxml/add_pemda_document.fxml" : "/fxml/add_non_pemda_document.fxml";
-
-                FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
-                Parent formRoot = loader.load();
-
-                Object controller = loader.getController();
-                if (controller instanceof AddPemdaDocumentController) {
-                    ((AddPemdaDocumentController) controller).setCurrentUserId(currentUserId);
-                    ((AddPemdaDocumentController) controller).setDashboardController(this);
-                } else if (controller instanceof AddNonPemdaDocumentController) {
-                    ((AddNonPemdaDocumentController) controller).setCurrentUserId(currentUserId);
-                    ((AddNonPemdaDocumentController) controller).setDashboardController(this);
-                }
-
-                if (mainLayout != null) {
-                    mainLayout.setCenter(formRoot);
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                showAlert("Error", "Gagal membuka form: " + e.getMessage());
+            if (mainLayout != null) {
+                mainLayout.setCenter(formRoot);
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error", "Gagal membuka form: " + e.getMessage());
         }
         updateMenuStyle(btnTambah);
     }
@@ -773,7 +816,7 @@ public class DashboardController {
             Parent root = loader.load();
 
             AllDocumentsController controller = loader.getController();
-            controller.setUserData(currentUserId, lblUserName.getText());
+            controller.setUserData(currentUserId, lblUserName.getText(), currentUserRole);
             controller.setDashboardController(this);
 
             if (mainLayout != null) {
@@ -785,16 +828,6 @@ public class DashboardController {
             showAlert("Error", "Gagal membuka halaman dokumen: " + e.getMessage());
         }
         updateMenuStyle(btnSemuaDokumen);
-    }
-
-    @FXML private void handleRenewal() {
-        showAlert("Info", "Fitur perpanjangan akan dibuat...");
-        updateMenuStyle(btnPerpanjangan);
-    }
-
-    @FXML private void handleNotifications() {
-        showAlert("Info", "Fitur notifikasi akan dibuat...");
-        updateMenuStyle(btnNotifikasi);
     }
 
     @FXML
@@ -816,6 +849,27 @@ public class DashboardController {
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Error", "Gagal membuka halaman user: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleTindakLanjut() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/tindak_lanjut.fxml"));
+            Parent root = loader.load();
+
+            TindakLanjutController controller = loader.getController();
+            controller.setUserData(currentUserId, lblUserName.getText(), currentUserRole);
+            controller.setMainLayout(mainLayout);
+
+            if (mainLayout != null) {
+                mainLayout.setCenter(root);
+            }
+
+            updateMenuStyle(btnTindakLanjut);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error", "Gagal membuka halaman tindak lanjut: " + e.getMessage());
         }
     }
 
@@ -877,12 +931,14 @@ public class DashboardController {
         String activeStyle = "-fx-background-color: #eff6ff; -fx-text-fill: #2563eb; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12 16; -fx-cursor: hand; -fx-alignment: CENTER_LEFT;";
         String inactiveStyle = "-fx-background-color: transparent; -fx-text-fill: #475569; -fx-padding: 12 16; -fx-cursor: hand; -fx-alignment: CENTER_LEFT;";
 
-        Button[] buttons = {btnDashboard, btnTambah, btnSemuaDokumen, btnPerpanjangan, btnNotifikasi, btnUser};
+        Button[] buttons = {btnDashboard, btnTambah, btnSemuaDokumen, btnTindakLanjut, btnUser};
         for (Button btn : buttons) {
-            if (btn == activeButton) {
-                btn.setStyle(activeStyle);
-            } else {
-                btn.setStyle(inactiveStyle);
+            if (btn != null && btn.isVisible()) {
+                if (btn == activeButton) {
+                    btn.setStyle(activeStyle);
+                } else {
+                    btn.setStyle(inactiveStyle);
+                }
             }
         }
     }
@@ -943,8 +999,8 @@ public class DashboardController {
 
     private void applyCardFilter(String filterType) {
         String sql = "SELECT * FROM documents WHERE is_deleted = 0";
-        if ("MOU".equals(filterType)) sql += " AND jenis = 'MOU'";
-        else if ("PKS".equals(filterType)) sql += " AND jenis = 'PKS'";
+        if ("MOU".equals(filterType)) sql += " AND UPPER(jenis) LIKE '%MOU%'";
+        else if ("PKS".equals(filterType)) sql += " AND UPPER(jenis) LIKE '%PKS%'";
         else if ("AKTIF".equals(filterType)) sql += " AND (tanggal_berakhir >= CURDATE() OR tanggal_berakhir IS NULL)";
         else if ("KADALUARSA".equals(filterType)) sql += " AND tanggal_berakhir < CURDATE()";
 
@@ -1228,7 +1284,7 @@ public class DashboardController {
         item.setStyle("-fx-background-color: white; -fx-background-radius: 8; " +
                 "-fx-padding: 15; -fx-border-color: #e2e8f0; -fx-border-radius: 8;");
 
-        Label lblTanggal = new Label("📅 " + formatTanggalIndonesia(history.getCreatedAt().toLocalDateTime().toLocalDate()));
+        Label lblTanggal = new Label(" " + formatTanggalIndonesia(history.getCreatedAt().toLocalDateTime().toLocalDate()));
         lblTanggal.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1e293b;");
 
         Label lblOldDate = new Label("Tanggal Lama: " + formatTanggalIndonesia(history.getOldEndDate()));

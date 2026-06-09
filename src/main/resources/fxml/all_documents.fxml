@@ -23,9 +23,9 @@
 
                 <!-- Tab Selector -->
                 <HBox spacing="0" style="-fx-background-color: #f1f5f9; -fx-background-radius: 10; -fx-padding: 4;">
-                    <Button fx:id="btnPemda" text="🏛️  Pemerintah Daerah" onAction="#showPemdaDocuments"
+                    <Button fx:id="btnPemda" text="🏛 Pemerintah Daerah" onAction="#showPemdaDocuments"
                             style="-fx-background-color: #0d9488; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 12 30; -fx-cursor: hand;"/>
-                    <Button fx:id="btnNonPemda" text="🏢  Non-Pemerintah Daerah" onAction="#showNonPemdaDocuments"
+                    <Button fx:id="btnNonPemda" text="🏢 Non-Pemerintah Daerah" onAction="#showNonPemdaDocuments"
                             style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 12 30; -fx-cursor: hand;"/>
                 </HBox>
 

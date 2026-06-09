@@ -12,6 +12,7 @@ public class RenewalHistory {
     private String newStatus;
     private String notes;
     private Timestamp createdAt;
+    private String renewedBy;
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -36,4 +37,7 @@ public class RenewalHistory {
 
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+
+    public String getRenewedBy() { return renewedBy; }
+    public void setRenewedBy(String renewedBy) { this.renewedBy = renewedBy; }
 }

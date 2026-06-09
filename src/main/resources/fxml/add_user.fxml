@@ -4,54 +4,61 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.sikerma.sikerma.controller.AddUserController"
-      spacing="20" style="-fx-padding: 30; -fx-background-color: #f8fafc;">
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.sikerma.sikerma.controller.AddUserController"
+            style="-fx-background-color: #f8fafc;">
 
-    <VBox spacing="8">
-        <Label text="Tambah User Baru" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
-        <Label text="Isi data pengguna di bawah ini" style="-fx-font-size: 13px; -fx-text-fill: #64748b;"/>
-    </VBox>
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true" style="-fx-background-color: transparent; -fx-border-width: 0;">
+            <VBox spacing="20" style="-fx-padding: 30; -fx-background-color: #f8fafc;">
 
-    <Separator style="-fx-background-color: #e2e8f0;"/>
+                <VBox spacing="8">
+                    <Label text="Tambah User Baru" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                    <Label text="Isi data pengguna di bawah ini" style="-fx-font-size: 13px; -fx-text-fill: #64748b;"/>
+                </VBox>
 
-    <VBox spacing="15">
-        <VBox spacing="5">
-            <Label text="Username" style="-fx-font-weight: 600; -fx-text-fill: #334155;"/>
-            <TextField fx:id="txtUsername" promptText="Masukkan username"
-                       style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 12;"/>
-        </VBox>
+                <Separator style="-fx-background-color: #e2e8f0;"/>
 
-        <VBox spacing="5">
-            <Label text="Email" style="-fx-font-weight: 600; -fx-text-fill: #334155;"/>
-            <TextField fx:id="txtEmail" promptText="Masukkan email"
-                       style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 12;"/>
-        </VBox>
+                <VBox spacing="15">
+                    <VBox spacing="5">
+                        <Label text="Username *" style="-fx-font-weight: 600; -fx-text-fill: #334155;"/>
+                        <TextField fx:id="txtUsername" promptText="Masukkan username"
+                                   style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 12;"/>
+                    </VBox>
 
-        <VBox spacing="5">
-            <Label text="Nama Lengkap" style="-fx-font-weight: 600; -fx-text-fill: #334155;"/>
-            <TextField fx:id="txtNamaLengkap" promptText="Masukkan nama lengkap"
-                       style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 12;"/>
-        </VBox>
+                    <VBox spacing="5">
+                        <Label text="Email *" style="-fx-font-weight: 600; -fx-text-fill: #334155;"/>
+                        <TextField fx:id="txtEmail" promptText="Masukkan email"
+                                   style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 12;"/>
+                    </VBox>
 
-        <VBox spacing="5">
-            <Label text="Password" style="-fx-font-weight: 600; -fx-text-fill: #334155;"/>
-            <PasswordField fx:id="txtPassword" promptText="Masukkan password"
-                           style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 12;"/>
-        </VBox>
+                    <VBox spacing="5">
+                        <Label text="Password *" style="-fx-font-weight: 600; -fx-text-fill: #334155;"/>
+                        <PasswordField fx:id="txtPassword" promptText="Masukkan password"
+                                       style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 12;"/>
+                    </VBox>
 
-        <VBox spacing="5">
-            <Label text="Role" style="-fx-font-weight: 600; -fx-text-fill: #334155;"/>
-            <ComboBox fx:id="cbRole" prefWidth="Infinity"
-                      style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 12;"/>
-        </VBox>
-    </VBox>
+                    <VBox spacing="5">
+                        <Label text="Nama Lengkap" style="-fx-font-weight: 600; -fx-text-fill: #334155;"/>
+                        <TextField fx:id="txtNamaLengkap" promptText="Masukkan nama lengkap"
+                                   style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 12;"/>
+                    </VBox>
 
-    <HBox spacing="10" alignment="CENTER_RIGHT">
-        <Button text="Batal" onAction="#handleCancel"
-                style="-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-background-radius: 8; -fx-padding: 10 24; -fx-cursor: hand;"/>
-        <Button text="Simpan" onAction="#handleSave"
-                style="-fx-background-color: #0d9488; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 24; -fx-cursor: hand;"/>
-    </HBox>
+                    <VBox spacing="5">
+                        <Label text="Role *" style="-fx-font-weight: 600; -fx-text-fill: #334155;"/>
+                        <ComboBox fx:id="cbRole" prefWidth="Infinity"
+                                  style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 12;"/>
+                    </VBox>
+                </VBox>
 
-</VBox>
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button text="Batal" onAction="#handleCancel"
+                            style="-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-background-radius: 8; -fx-padding: 10 24; -fx-cursor: hand;"/>
+                    <Button text="Simpan User" onAction="#handleSave"
+                            style="-fx-background-color: #0d9488; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 24; -fx-cursor: hand;"/>
+                </HBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

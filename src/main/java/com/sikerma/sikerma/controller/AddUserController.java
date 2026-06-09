@@ -39,7 +39,6 @@ public class AddUserController {
         }
 
         try (Connection conn = DatabaseConfig.connect()) {
-            // ✅ SESUAIKAN DENGAN STRUKTUR TABEL: full_name, password_hash, role (admin/staff), is_active
             String sql = "INSERT INTO users (username, email, full_name, password_hash, role, is_active, created_at) " +
                     "VALUES (?, ?, ?, ?, ?, 1, NOW())";
 
@@ -47,9 +46,8 @@ public class AddUserController {
             pstmt.setString(1, txtUsername.getText().trim());
             pstmt.setString(2, txtEmail.getText().trim());
             pstmt.setString(3, txtNamaLengkap.getText().trim());
-            pstmt.setString(4, txtPassword.getText()); // TODO: Hash password untuk production
+            pstmt.setString(4, txtPassword.getText());
 
-            // ✅ KONVERSI ROLE: "Administrator" -> "admin", "User" -> "staff"
             String roleValue = cbRole.getValue();
             String dbRole = "Administrator".equals(roleValue) ? "admin" : "staff";
             pstmt.setString(5, dbRole);

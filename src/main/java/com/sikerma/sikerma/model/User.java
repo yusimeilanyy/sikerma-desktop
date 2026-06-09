@@ -10,6 +10,7 @@ public class User {
     private String role;
     private String status;
     private LocalDate createdAt;
+    private String picBlsdm;
 
     // Getters and Setters
     public int getId() { return id; }
@@ -32,4 +33,7 @@ public class User {
 
     public LocalDate getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDate createdAt) { this.createdAt = createdAt; }
+
+    public String getPicBlsdm() { return picBlsdm; }
+    public void setPicBlsdm(String picBlsdm) { this.picBlsdm = picBlsdm; }
 }

@@ -5,15 +5,10 @@ import com.sikerma.sikerma.model.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -22,6 +17,16 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class UserManagementController {
+
+    @FXML private VBox formPanel;
+    @FXML private Button btnTambahUser;
+    @FXML private Label lblTotalUsers;
+    @FXML private TextField txtUsername;
+    @FXML private TextField txtEmail;
+    @FXML private TextField txtNamaLengkap;
+    @FXML private PasswordField txtPassword;
+    @FXML private TextField txtPasswordVisible;
+    @FXML private ComboBox<String> cbRole;
 
     @FXML private TableView<User> tableUsers;
     @FXML private TableColumn<User, String> colUsername;
@@ -47,7 +52,16 @@ public class UserManagementController {
     @FXML
     public void initialize() {
         initializeTable();
+        initializeForm();
         loadUsers();
+    }
+
+    private void initializeForm() {
+        cbRole.getItems().addAll("User", "Administrator");
+        cbRole.setValue("User");
+
+        formPanel.setVisible(false);
+        formPanel.setManaged(false);
     }
 
     private void initializeTable() {
@@ -63,72 +77,12 @@ public class UserManagementController {
             );
         });
 
-        // ✅ CENTER ALIGNMENT UNTUK USERNAME
-        colUsername.setCellFactory(column -> new TableCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    setText(item);
-                    setAlignment(Pos.CENTER);
-                    setStyle("-fx-text-fill: #475569;");
-                }
-            }
-        });
-
-        // ✅ CENTER ALIGNMENT UNTUK EMAIL
-        colEmail.setCellFactory(column -> new TableCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    setText(item);
-                    setAlignment(Pos.CENTER);
-                    setStyle("-fx-text-fill: #475569;");
-                }
-            }
-        });
-
-        // ✅ CENTER ALIGNMENT UNTUK NAMA LENGKAP
-        colNamaLengkap.setCellFactory(column -> new TableCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    setText(item);
-                    setAlignment(Pos.CENTER);
-                    setStyle("-fx-text-fill: #475569;");
-                }
-            }
-        });
-
-        // ✅ CENTER ALIGNMENT UNTUK DIBUAT
-        colDibuat.setCellFactory(column -> new TableCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    setText(item);
-                    setAlignment(Pos.CENTER);
-                    setStyle("-fx-text-fill: #475569;");
-                }
-            }
-        });
+        setupTextColumn(colUsername);
+        setupTextColumn(colEmail);
+        setupTextColumn(colNamaLengkap);
+        setupTextColumn(colDibuat);
 
         colRole.setCellFactory(column -> new TableCell<>() {
-            @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
@@ -137,10 +91,10 @@ public class UserManagementController {
                     Label badge = new Label(item);
                     if ("Administrator".equals(item)) {
                         badge.setStyle("-fx-background-color: #f3e8ff; -fx-text-fill: #6b21a8; " +
-                                "-fx-background-radius: 6; -fx-padding: 4 12; -fx-font-weight: bold;");
+                                "-fx-background-radius: 12; -fx-padding: 3 8; -fx-font-weight: bold; -fx-font-size: 10px;");
                     } else {
                         badge.setStyle("-fx-background-color: #dbeafe; -fx-text-fill: #1e40af; " +
-                                "-fx-background-radius: 6; -fx-padding: 4 12; -fx-font-weight: bold;");
+                                "-fx-background-radius: 12; -fx-padding: 3 8; -fx-font-weight: bold; -fx-font-size: 10px;");
                     }
                     setGraphic(badge);
                     setAlignment(Pos.CENTER);
@@ -149,15 +103,19 @@ public class UserManagementController {
         });
 
         colStatus.setCellFactory(column -> new TableCell<>() {
-            @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setGraphic(null);
                 } else {
                     Label badge = new Label(item);
-                    badge.setStyle("-fx-background-color: #ccfbf1; -fx-text-fill: #0f766e; " +
-                            "-fx-background-radius: 6; -fx-padding: 4 12; -fx-font-weight: bold;");
+                    if ("Aktif".equals(item)) {
+                        badge.setStyle("-fx-background-color: #d1fae5; -fx-text-fill: #047857; " +
+                                "-fx-background-radius: 12; -fx-padding: 3 8; -fx-font-weight: bold; -fx-font-size: 10px;");
+                    } else {
+                        badge.setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #dc2626; " +
+                                "-fx-background-radius: 12; -fx-padding: 3 8; -fx-font-weight: bold; -fx-font-size: 10px;");
+                    }
                     setGraphic(badge);
                     setAlignment(Pos.CENTER);
                 }
@@ -165,7 +123,6 @@ public class UserManagementController {
         });
 
         colAksi.setCellFactory(param -> new TableCell<>() {
-            @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty) {
@@ -178,9 +135,8 @@ public class UserManagementController {
                     }
 
                     Button btnDelete = new Button("🗑️");
-                    btnDelete.setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #ef4444; " +
-                            "-fx-cursor: hand; -fx-font-size: 16px; -fx-background-radius: 6; " +
-                            "-fx-padding: 4 10;");
+                    btnDelete.setStyle("-fx-background-color: transparent; -fx-text-fill: #ef4444; " +
+                            "-fx-cursor: hand; -fx-font-size: 14px;");
                     btnDelete.setTooltip(new Tooltip("Hapus User"));
                     btnDelete.setOnAction(e -> handleDeleteUser(user));
 
@@ -190,8 +146,102 @@ public class UserManagementController {
             }
         });
 
-        tableUsers.setFixedCellSize(70);
-        tableUsers.setStyle("-fx-background-color: transparent; -fx-border-width: 0;");
+        tableUsers.setFixedCellSize(45);
+        tableUsers.setStyle("-fx-background-color: transparent; -fx-border-width: 0; -fx-font-size: 11px;");
+    }
+
+    private void setupTextColumn(TableColumn<User, String> column) {
+        column.setCellFactory(col -> new TableCell<>() {
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item);
+                setAlignment(Pos.CENTER_LEFT);
+                setStyle("-fx-text-fill: #475569; -fx-padding: 3 8; -fx-font-size: 11px;");
+            }
+        });
+    }
+
+    @FXML
+    private void handleTambahUser() {
+        formPanel.setVisible(true);
+        formPanel.setManaged(true);
+        handleResetForm();
+        txtUsername.requestFocus();
+    }
+
+    @FXML
+    private void handleBatalForm() {
+        formPanel.setVisible(false);
+        formPanel.setManaged(false);
+        handleResetForm();
+    }
+
+    @FXML
+    private void handleResetForm() {
+        txtUsername.clear();
+        txtEmail.clear();
+        txtNamaLengkap.clear();
+        txtPassword.clear();
+        if (txtPasswordVisible != null) {
+            txtPasswordVisible.clear();
+        }
+        cbRole.setValue("User");
+    }
+
+    @FXML
+    private void handleSaveUser() {
+        if (txtUsername.getText().trim().isEmpty()) {
+            showAlert("Validasi", "Username wajib diisi!", Alert.AlertType.WARNING);
+            txtUsername.requestFocus();
+            return;
+        }
+
+        if (txtEmail.getText().trim().isEmpty()) {
+            showAlert("Validasi", "Email wajib diisi!", Alert.AlertType.WARNING);
+            txtEmail.requestFocus();
+            return;
+        }
+
+        if (txtNamaLengkap.getText().trim().isEmpty()) {
+            showAlert("Validasi", "Nama Lengkap wajib diisi!", Alert.AlertType.WARNING);
+            txtNamaLengkap.requestFocus();
+            return;
+        }
+
+        if (txtPassword.getText().trim().isEmpty()) {
+            showAlert("Validasi", "Password wajib diisi!", Alert.AlertType.WARNING);
+            txtPassword.requestFocus();
+            return;
+        }
+
+        try (Connection conn = DatabaseConfig.connect()) {
+            String sql = "INSERT INTO users (username, email, full_name, password_hash, role, is_active, pic_blsdm, created_at) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
+
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, txtUsername.getText().trim());
+            pstmt.setString(2, txtEmail.getText().trim());
+            pstmt.setString(3, txtNamaLengkap.getText().trim());
+            pstmt.setString(4, txtPassword.getText());
+
+            String roleValue = cbRole.getValue();
+            String dbRole = "Administrator".equals(roleValue) ? "admin" : "staff";
+            pstmt.setString(5, dbRole);
+
+            pstmt.setInt(6, 1);
+            pstmt.setString(7, "");
+
+            pstmt.executeUpdate();
+
+            showAlert("Sukses", "User berhasil ditambahkan!", Alert.AlertType.INFORMATION);
+
+            handleBatalForm();
+            loadUsers();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error", "Gagal menambah user: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
     }
 
     private void loadUsers() {
@@ -207,8 +257,8 @@ public class UserManagementController {
                 user.setId(rs.getInt("id"));
                 user.setUsername(rs.getString("username"));
                 user.setEmail(rs.getString("email"));
-
                 user.setNamaLengkap(rs.getString("full_name"));
+                user.setPicBlsdm(rs.getString("pic_blsdm"));
 
                 String dbRole = rs.getString("role");
                 if ("admin".equals(dbRole)) {
@@ -230,31 +280,13 @@ public class UserManagementController {
 
             tableUsers.setItems(userList);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Error", "Gagal memuat data: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    private void handleTambahUser() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/add_user.fxml"));
-            Parent formRoot = loader.load();
-
-            AddUserController controller = loader.getController();
-            controller.setDashboardController(this);
-
-            Stage stage = new Stage();
-            stage.setTitle("Tambah User Baru");
-            stage.setScene(new Scene(formRoot, 600, 500));
-            stage.showAndWait();
-
-            loadUsers();
+            if (lblTotalUsers != null) {
+                lblTotalUsers.setText("Total : " + userList.size());
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert("Error", "Gagal membuka form: " + e.getMessage());
+            showAlert("Error", "Gagal memuat data: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
@@ -262,6 +294,7 @@ public class UserManagementController {
     private void handleDeleteUser(User user) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Konfirmasi Hapus");
+        confirm.setHeaderText("Hapus User");
         confirm.setContentText("Yakin ingin menghapus user: " + user.getNamaLengkap() + "?");
 
         confirm.showAndWait().ifPresent(response -> {
@@ -272,10 +305,10 @@ public class UserManagementController {
                     pstmt.setInt(1, user.getId());
                     pstmt.executeUpdate();
 
-                    showAlert("Sukses", "User berhasil dihapus.");
+                    showAlert("Sukses", "User berhasil dihapus.", Alert.AlertType.INFORMATION);
                     loadUsers();
                 } catch (Exception e) {
-                    showAlert("Error", "Gagal menghapus: " + e.getMessage());
+                    showAlert("Error", "Gagal menghapus: " + e.getMessage(), Alert.AlertType.ERROR);
                 }
             }
         });
@@ -284,11 +317,11 @@ public class UserManagementController {
     @FXML
     private void handleDashboard() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard.fxml"));
-            Parent root = loader.load();
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/dashboard.fxml"));
+            javafx.scene.Parent root = loader.load();
 
             DashboardController controller = loader.getController();
-            controller.setUserData(currentUserId, "Administrator Sistem", "ADMIN");
+            controller.setUserData(currentUserId, "Administrator Sistem", "admin");
 
             if (dashboardController != null && dashboardController.getMainLayout() != null) {
                 dashboardController.getMainLayout().setCenter(root);
@@ -300,29 +333,17 @@ public class UserManagementController {
 
     @FXML
     private void handleTambahDokumen() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard.fxml"));
-            Parent root = loader.load();
-
-            DashboardController controller = loader.getController();
-            controller.setUserData(currentUserId, "Administrator Sistem", "ADMIN");
-
-            if (dashboardController != null && dashboardController.getMainLayout() != null) {
-                dashboardController.getMainLayout().setCenter(root);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        handleDashboard();
     }
 
     @FXML
     private void handleSemuaDokumen() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/all_documents.fxml"));
-            Parent root = loader.load();
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/all_documents.fxml"));
+            javafx.scene.Parent root = loader.load();
 
             AllDocumentsController controller = loader.getController();
-            controller.setUserData(currentUserId, "Administrator Sistem");
+            controller.setUserData(currentUserId, "Administrator Sistem", "admin");
             controller.setDashboardController(dashboardController);
 
             if (dashboardController != null && dashboardController.getMainLayout() != null) {
@@ -335,13 +356,14 @@ public class UserManagementController {
 
     @FXML
     private void handleLogout() {
-        Stage stage = (Stage) tableUsers.getScene().getWindow();
+        javafx.stage.Stage stage = (javafx.stage.Stage) tableUsers.getScene().getWindow();
         stage.close();
     }
 
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+    private void showAlert(String title, String message, Alert.AlertType type) {
+        Alert alert = new Alert(type);
         alert.setTitle(title);
+        alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
     }

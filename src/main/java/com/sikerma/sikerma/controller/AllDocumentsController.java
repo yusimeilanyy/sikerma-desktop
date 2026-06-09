@@ -55,21 +55,23 @@ public class AllDocumentsController {
     private ObservableList<Document> filteredList = FXCollections.observableArrayList();
     private int currentUserId;
     private String currentFilter = "Pemerintah Daerah";
+    private String currentUserRole; // TAMBAHAN: Field untuk menyimpan role
     private DashboardController dashboardController;
 
     public void setDashboardController(DashboardController controller) {
         this.dashboardController = controller;
     }
 
-    public void setUserData(int userId, String userName) {
+    // MODIFIKASI: Tambah parameter role
+    public void setUserData(int userId, String userName, String role) {
         this.currentUserId = userId;
+        this.currentUserRole = role; // TAMBAHAN: Simpan role
         initializeTable();
         initializeFilters();
         loadDocuments();
     }
 
     private void initializeTable() {
-        // ✅ Jenis Perjanjian - HANYA TAMPILKAN MoU/PKS
         colJenisPerjanjian.setCellValueFactory(new PropertyValueFactory<>("jenis"));
         colJenisPerjanjian.setCellFactory(column -> new TableCell<>() {
             @Override
@@ -79,7 +81,6 @@ public class AllDocumentsController {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    // ✅ Ambil hanya "MoU" atau "PKS" saja
                     String displayText = item;
                     if (item.contains("(")) {
                         displayText = item.substring(0, item.indexOf("(")).trim();
@@ -100,7 +101,6 @@ public class AllDocumentsController {
         colJenisPerjanjian.setMaxWidth(100);
         colJenisPerjanjian.setMinWidth(100);
 
-        // ✅ Tingkat Kerja Sama - CENTER + WRAP
         colTingkatKerjaSama.setCellValueFactory(cellData -> {
             Document doc = cellData.getValue();
             if (doc == null) return new javafx.beans.property.SimpleStringProperty("-");
@@ -138,7 +138,6 @@ public class AllDocumentsController {
         colTingkatKerjaSama.setMaxWidth(180);
         colTingkatKerjaSama.setMinWidth(180);
 
-        // ✅ Jenis Dokumen - CENTER
         colJenisDokumen.setCellValueFactory(new PropertyValueFactory<>("jenisDokumenDetail"));
         colJenisDokumen.setCellFactory(column -> new TableCell<>() {
             @Override
@@ -160,16 +159,12 @@ public class AllDocumentsController {
         colJenisDokumen.setMaxWidth(130);
         colJenisDokumen.setMinWidth(130);
 
-        // ✅ PIC BPSDMP - CENTER
         colPicBpsdmp.setCellValueFactory(cellData -> {
             Document doc = cellData.getValue();
             if (doc == null) return new javafx.beans.property.SimpleStringProperty("-");
-            String kategori = doc.getKategori();
             String picBlsdm = doc.getPicBlsdm();
-            String pic = doc.getPic();
-            String result = "Pemerintah Daerah".equals(kategori) ? picBlsdm : pic;
             return new javafx.beans.property.SimpleStringProperty(
-                    (result != null && !result.isEmpty()) ? result : "-"
+                    (picBlsdm != null && !picBlsdm.isEmpty()) ? picBlsdm : "-"
             );
         });
         colPicBpsdmp.setCellFactory(column -> new TableCell<>() {
@@ -192,7 +187,6 @@ public class AllDocumentsController {
         colPicBpsdmp.setMaxWidth(120);
         colPicBpsdmp.setMinWidth(120);
 
-        // ✅ PIC PEMDA/MITRA - CENTER (NAMA & KONTAK)
         colPicPemda.setCellValueFactory(cellData -> {
             Document doc = cellData.getValue();
             if (doc == null) return new javafx.beans.property.SimpleStringProperty("-");
@@ -240,7 +234,6 @@ public class AllDocumentsController {
         colPicPemda.setMaxWidth(130);
         colPicPemda.setMinWidth(130);
 
-        // ✅ Tanggal Mulai - CENTER
         colTanggalMulai.setCellValueFactory(cellData -> {
             Document doc = cellData.getValue();
             if (doc == null) return new javafx.beans.property.SimpleStringProperty("-");
@@ -255,7 +248,6 @@ public class AllDocumentsController {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
-                    setGraphic(null);
                 } else {
                     setText(item);
                     setTextAlignment(TextAlignment.CENTER);
@@ -268,7 +260,6 @@ public class AllDocumentsController {
         colTanggalMulai.setMaxWidth(110);
         colTanggalMulai.setMinWidth(110);
 
-        // ✅ Tanggal Berakhir - CENTER
         colTanggalBerakhir.setCellValueFactory(cellData -> {
             Document doc = cellData.getValue();
             if (doc == null) return new javafx.beans.property.SimpleStringProperty("-");
@@ -283,7 +274,6 @@ public class AllDocumentsController {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
-                    setGraphic(null);
                 } else {
                     setText(item);
                     setTextAlignment(TextAlignment.CENTER);
@@ -296,7 +286,6 @@ public class AllDocumentsController {
         colTanggalBerakhir.setMaxWidth(110);
         colTanggalBerakhir.setMinWidth(110);
 
-        // ✅ STATUS - CENTER + WRAP + SOFT COLORS
         colStatus.setCellValueFactory(cellData -> {
             Document doc = cellData.getValue();
             if (doc == null) return new javafx.beans.property.SimpleStringProperty("-");
@@ -345,12 +334,10 @@ public class AllDocumentsController {
         colStatus.setMaxWidth(150);
         colStatus.setMinWidth(150);
 
-        // ✅ Catatan - CENTER (FIX: tampilkan "-" jika kosong)
         colCatatan.setCellValueFactory(cellData -> {
             Document doc = cellData.getValue();
             if (doc == null) return new javafx.beans.property.SimpleStringProperty("-");
             String ket = doc.getKeterangan();
-            // ✅ FIX: Cek null, kosong, atau whitespace
             if (ket == null || ket.trim().isEmpty()) {
                 return new javafx.beans.property.SimpleStringProperty("-");
             }
@@ -376,7 +363,6 @@ public class AllDocumentsController {
         colCatatan.setMaxWidth(100);
         colCatatan.setMinWidth(100);
 
-        // ✅ Dokumen Final - CENTER
         colDokumenFinal.setCellFactory(param -> new TableCell<>() {
             @Override
             protected void updateItem(Void item, boolean empty) {
@@ -403,7 +389,7 @@ public class AllDocumentsController {
         colDokumenFinal.setMaxWidth(80);
         colDokumenFinal.setMinWidth(80);
 
-        // ✅ Aksi - CENTER
+        // MODIFIKASI: Kolom Aksi dengan role checking
         colAksi.setCellFactory(param -> new TableCell<>() {
             @Override
             protected void updateItem(Void item, boolean empty) {
@@ -417,22 +403,39 @@ public class AllDocumentsController {
                         return;
                     }
 
-                    Button btnEdit = new Button("✏️");
-                    btnEdit.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; " +
-                            "-fx-cursor: hand; -fx-font-size: 14px; -fx-background-radius: 5; " +
-                            "-fx-padding: 5 10;");
-                    btnEdit.setTooltip(new Tooltip("Edit"));
-                    btnEdit.setOnAction(e -> handleEdit(doc));
-
-                    Button btnDelete = new Button("🗑️");
-                    btnDelete.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; " +
-                            "-fx-cursor: hand; -fx-font-size: 14px; -fx-background-radius: 5; " +
-                            "-fx-padding: 5 10;");
-                    btnDelete.setTooltip(new Tooltip("Hapus"));
-                    btnDelete.setOnAction(e -> handleDelete(doc));
-
-                    HBox hbox = new HBox(8, btnEdit, btnDelete);
+                    HBox hbox = new HBox(8);
                     hbox.setAlignment(Pos.CENTER);
+
+                    // TAMBAHAN: Cek apakah user adalah Admin
+                    boolean isAdmin = currentUserRole != null &&
+                            (currentUserRole.equalsIgnoreCase("admin") ||
+                                    currentUserRole.equalsIgnoreCase("administrator"));
+
+                    if (isAdmin) {
+                        // Admin bisa Edit dan Hapus
+                        Button btnEdit = new Button("✏️");
+                        btnEdit.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; " +
+                                "-fx-cursor: hand; -fx-font-size: 14px; -fx-background-radius: 5; " +
+                                "-fx-padding: 5 10;");
+                        btnEdit.setTooltip(new Tooltip("Edit"));
+                        btnEdit.setOnAction(e -> handleEdit(doc));
+
+                        Button btnDelete = new Button("🗑️");
+                        btnDelete.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; " +
+                                "-fx-cursor: hand; -fx-font-size: 14px; -fx-background-radius: 5; " +
+                                "-fx-padding: 5 10;");
+                        btnDelete.setTooltip(new Tooltip("Hapus"));
+                        btnDelete.setOnAction(e -> handleDelete(doc));
+
+                        hbox.getChildren().addAll(btnEdit, btnDelete);
+                    } else {
+                        // Staff/PIC hanya bisa lihat (tidak ada tombol)
+                        Label lblInfo = new Label("👁️");
+                        lblInfo.setStyle("-fx-font-size: 14px; -fx-text-fill: #64748b;");
+                        lblInfo.setTooltip(new Tooltip("View Only - Staff/PIC"));
+                        hbox.getChildren().add(lblInfo);
+                    }
+
                     setGraphic(hbox);
                     setAlignment(Pos.CENTER);
                 }
@@ -442,7 +445,6 @@ public class AllDocumentsController {
         colAksi.setMaxWidth(120);
         colAksi.setMinWidth(120);
 
-        // ✅ Row Height
         tableDocuments.setRowFactory(tv -> new TableRow<>() {
             @Override
             protected void updateItem(Document item, boolean empty) {
@@ -458,7 +460,6 @@ public class AllDocumentsController {
                 "Review BPSDMP 2", "Persiapan TTD Para Pihak", "Selesai");
         cbStatusFilter.setValue("Semua Status");
 
-        // ✅ TAMBAHAN: Event handler untuk filter status
         cbStatusFilter.setOnAction(e -> applyFilters());
     }
 
@@ -510,7 +511,6 @@ public class AllDocumentsController {
         }
     }
 
-    // ✅ TAMBAHAN: Method untuk apply filter status dan search
     private void applyFilters() {
         String selectedStatus = cbStatusFilter.getValue();
         String keyword = txtSearch.getText().toLowerCase();
@@ -519,12 +519,12 @@ public class AllDocumentsController {
 
         for (Document doc : documentList) {
             boolean matchStatus = "Semua Status".equals(selectedStatus) ||
-                    doc.getStatus().equals(selectedStatus);
+                    (doc.getStatus() != null && doc.getStatus().equals(selectedStatus));
 
             boolean matchSearch = keyword.isEmpty() ||
-                    doc.getNomorDokumen().toLowerCase().contains(keyword) ||
-                    doc.getMitra().toLowerCase().contains(keyword) ||
-                    doc.getJenis().toLowerCase().contains(keyword);
+                    (doc.getNomorDokumen() != null && doc.getNomorDokumen().toLowerCase().contains(keyword)) ||
+                    (doc.getMitra() != null && doc.getMitra().toLowerCase().contains(keyword)) ||
+                    (doc.getJenis() != null && doc.getJenis().toLowerCase().contains(keyword));
 
             if (matchStatus && matchSearch) {
                 filtered.add(doc);
@@ -535,7 +535,6 @@ public class AllDocumentsController {
         lblTotalDocs.setText("(" + filtered.size() + ")");
     }
 
-    // ✅ TAMBAHAN: Method untuk view/download dokumen
     private void handleViewDocument(Document doc) {
         if (doc.getFilePath() == null || doc.getFilePath().isEmpty()) {
             showAlert("Info", "Dokumen belum diupload.");
@@ -549,7 +548,6 @@ public class AllDocumentsController {
         }
 
         try {
-            // Buka file dengan aplikasi default
             java.awt.Desktop.getDesktop().open(file);
         } catch (IOException e) {
             showAlert("Error", "Gagal membuka dokumen: " + e.getMessage());
@@ -591,7 +589,7 @@ public class AllDocumentsController {
             stage.setScene(new Scene(loader.load()));
 
             DashboardController controller = loader.getController();
-            controller.setUserData(currentUserId, "User", "USER");
+            controller.setUserData(currentUserId, "User", currentUserRole != null ? currentUserRole : "USER");
 
             stage.show();
             ((Stage) lblSectionTitle.getScene().getWindow()).close();
@@ -613,14 +611,12 @@ public class AllDocumentsController {
     @FXML
     private void handleEdit(Document doc) {
         try {
-            // ✅ FIX: Gunakan form add yang sudah ada sebagai form edit
             String fxmlFile = "Pemerintah Daerah".equals(doc.getKategori()) ?
                     "/fxml/add_pemda_document.fxml" : "/fxml/add_non_pemda_document.fxml";
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
             Parent formRoot = loader.load();
 
-            // ✅ Set data dokumen ke controller
             Object controller = loader.getController();
             if ("Pemerintah Daerah".equals(doc.getKategori())) {
                 if (controller instanceof AddPemdaDocumentController) {
@@ -639,7 +635,6 @@ public class AllDocumentsController {
             if (dashboardController != null && dashboardController.getMainLayout() != null) {
                 dashboardController.getMainLayout().setCenter(formRoot);
             } else {
-                // Fallback: tampilkan di window baru
                 Stage stage = new Stage();
                 stage.setTitle("Edit Dokumen - " + doc.getNomorDokumen());
                 stage.setScene(new Scene(formRoot, 1200, 750));
