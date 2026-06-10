@@ -43,6 +43,7 @@ public class AddDocumentTabsController {
     @FXML private TextField txtNomorDokumenPemda;
     @FXML private TextField txtPICPemda;
     @FXML private TextField txtKontakPICPemda;
+    @FXML private TextField txtPemilikPemda;  // ✅ TAMBAHAN BARU
     @FXML private ComboBox<String> cbStatusPemda;
     @FXML private DatePicker dpTanggalMulaiPemda;
     @FXML private DatePicker dpTanggalBerakhirPemda;
@@ -61,6 +62,7 @@ public class AddDocumentTabsController {
     @FXML private TextField txtNomorDokumenMitra;
     @FXML private TextField txtPicMitra;
     @FXML private TextField txtKontakMitra;
+    @FXML private TextField txtPemilikNonPemda;  // ✅ TAMBAHAN BARU
     @FXML private ComboBox<String> cbStatusNonPemda;
     @FXML private DatePicker dpTanggalMulaiNonPemda;
     @FXML private DatePicker dpTanggalBerakhirNonPemda;
@@ -73,7 +75,6 @@ public class AddDocumentTabsController {
     private File selectedFileNonPemda;
     private boolean isPemdaActive = true;
 
-    // Data lists
     private ObservableList<String> kabSulut = FXCollections.observableArrayList(
             "Kab. Minahasa", "Kab. Minahasa Selatan", "Kab. Minahasa Utara",
             "Kab. Minahasa Tenggara", "Kota Manado", "Kota Bitung",
@@ -114,7 +115,6 @@ public class AddDocumentTabsController {
     }
 
     private void initializeComboBoxes() {
-        // PEMDA ComboBoxes
         cbJenisPerjanjianPemda.getItems().addAll(
                 "MoU (Memorandum of Understanding)",
                 "PKS (Perjanjian Kerja Sama)"
@@ -166,7 +166,6 @@ public class AddDocumentTabsController {
         );
         cbJenisDokumenNonPemda.setValue("Pilih jenis dokumen");
 
-        // Hnama user akan di load dari database
         cbPicBlsdmNonPemda.getItems().add("Pilih PIC BLSDM Komdigi Manado");
         cbPicBlsdmNonPemda.setValue("Pilih PIC BLSDM Komdigi Manado");
 
@@ -177,15 +176,9 @@ public class AddDocumentTabsController {
         );
         cbStatusNonPemda.setValue("Baru");
 
-        // Load PIC BLSDM dari database users (full_name)
         loadPICBLSDMFromUsers();
     }
 
-    /**
-     * Memuat nama lengkap user/staff dari tabel users untuk dropdown PIC BLSDM.
-     * Mengambil data dari kolom full_name di tabel users yang is_active = 1.
-     * Digunakan untuk dropdown PIC BLSDM di form Pemda dan Non-Pemda.
-     */
     private void loadPICBLSDMFromUsers() {
         String sql = "SELECT full_name FROM users WHERE is_active = 1 ORDER BY full_name ASC";
 
@@ -196,11 +189,9 @@ public class AddDocumentTabsController {
             while (rs.next()) {
                 String fullName = rs.getString("full_name");
                 if (fullName != null && !fullName.isEmpty()) {
-                    // Tambahkan ke dropdown PEMDA (hindari duplikat)
                     if (!cbPICBlsdmPemda.getItems().contains(fullName)) {
                         cbPICBlsdmPemda.getItems().add(fullName);
                     }
-                    // Tambahkan ke dropdown Non-PEMDA (hindari duplikat)
                     if (!cbPicBlsdmNonPemda.getItems().contains(fullName)) {
                         cbPicBlsdmNonPemda.getItems().add(fullName);
                     }
@@ -213,7 +204,6 @@ public class AddDocumentTabsController {
     }
 
     private void setupEventHandlers() {
-        // PEMDA Event Handlers
         cbTingkatKerjaSamaPemda.setOnAction(e -> {
             String selected = cbTingkatKerjaSamaPemda.getValue();
             hideConditionalFieldsPemda();
@@ -270,7 +260,6 @@ public class AddDocumentTabsController {
             }
         });
 
-        // Non-PEMDA Event Handlers
         cbJenisDokumenNonPemda.setOnAction(e -> {
             String selected = cbJenisDokumenNonPemda.getValue();
             if ("Lainnya...".equals(selected)) {
@@ -381,11 +370,16 @@ public class AddDocumentTabsController {
                 filePath = uploadFile(selectedFilePemda);
             }
 
+            // ✅ TAMBAHAN BARU: Ambil nilai field baru
+            String nomorDokumenPemda = txtNomorDokumenPemda.getText().trim();
+            String pemilik = txtPemilikPemda.getText().trim();
+
             Connection conn = DatabaseConfig.connect();
+            // ✅ Query diperbarui: tambah nomor_dokumen_pemda dan pemilik
             String sql = "INSERT INTO documents (jenis, mitra, kategori, jenis_dokumen_detail, " +
-                    "pic_blsdm, nomor_dokumen, tanggal_mulai, tanggal_berakhir, status, " +
+                    "pic_blsdm, nomor_dokumen, nomor_dokumen_pemda, pemilik, tanggal_mulai, tanggal_berakhir, status, " +
                     "pic, kontak_pic, keterangan, file_path, created_at) " +
-                    "VALUES (?, ?, 'Pemerintah Daerah', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                    "VALUES (?, ?, 'Pemerintah Daerah', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, cbJenisPerjanjianPemda.getValue());
@@ -393,20 +387,22 @@ public class AddDocumentTabsController {
             pstmt.setString(3, jenisDokumen);
             pstmt.setString(4, cbPICBlsdmPemda.getValue());
             pstmt.setString(5, txtNomorDokumenBalaiPemda.getText());
+            pstmt.setString(6, nomorDokumenPemda.isEmpty() ? null : nomorDokumenPemda);  // ✅ BARU
+            pstmt.setString(7, pemilik.isEmpty() ? null : pemilik);  // ✅ BARU
 
             LocalDate tglMulai = dpTanggalMulaiPemda.getValue();
-            pstmt.setDate(6, tglMulai != null ? java.sql.Date.valueOf(tglMulai) : null);
+            pstmt.setDate(8, tglMulai != null ? java.sql.Date.valueOf(tglMulai) : null);
 
             LocalDate tglBerakhir = dpTanggalBerakhirPemda.getValue();
-            pstmt.setDate(7, tglBerakhir != null ? java.sql.Date.valueOf(tglBerakhir) : null);
+            pstmt.setDate(9, tglBerakhir != null ? java.sql.Date.valueOf(tglBerakhir) : null);
 
-            pstmt.setString(8, cbStatusPemda.getValue());
-            pstmt.setString(9, txtPICPemda.getText());
-            pstmt.setString(10, txtKontakPICPemda.getText());
+            pstmt.setString(10, cbStatusPemda.getValue());
+            pstmt.setString(11, txtPICPemda.getText());
+            pstmt.setString(12, txtKontakPICPemda.getText());
 
             String catatan = txtCatatanPemda.getText().trim();
-            pstmt.setString(11, catatan.isEmpty() ? null : catatan);
-            pstmt.setString(12, filePath);
+            pstmt.setString(13, catatan.isEmpty() ? null : catatan);
+            pstmt.setString(14, filePath);
 
             pstmt.executeUpdate();
             conn.close();
@@ -455,28 +451,35 @@ public class AddDocumentTabsController {
             String kontakPic = txtKontakMitra.getText().trim();
             String catatan = txtCatatanNonPemda.getText().trim();
 
+            // ✅ TAMBAHAN BARU: Ambil nilai field baru
+            String nomorDokumenMitra = txtNomorDokumenMitra.getText().trim();
+            String pemilik = txtPemilikNonPemda.getText().trim();
+
             Connection conn = DatabaseConfig.connect();
-            String sql = "INSERT INTO documents (nomor_dokumen, jenis, mitra, kategori, jenis_dokumen_detail, " +
+            // ✅ Query diperbarui: tambah nomor_dokumen_mitra dan pemilik
+            String sql = "INSERT INTO documents (nomor_dokumen, nomor_dokumen_mitra, pemilik, jenis, mitra, kategori, jenis_dokumen_detail, " +
                     "tanggal_mulai, tanggal_berakhir, pic, kontak_pic, pic_blsdm, file_path, status, keterangan, created_by) " +
-                    "VALUES (?, ?, ?, 'Non-Pemerintah', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    "VALUES (?, ?, ?, ?, ?, 'Non-Pemerintah', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             PreparedStatement pstmt = conn.prepareStatement(sql);
             String nomorDokumen = txtNomorDokumenBalaiNonPemda.getText().trim();
             if (nomorDokumen.isEmpty()) nomorDokumen = txtNomorDokumenMitra.getText().trim();
 
             pstmt.setString(1, nomorDokumen);
-            pstmt.setString(2, jenisPerjanjian);
-            pstmt.setString(3, mitra);
-            pstmt.setString(4, jenisDokumenValue);
-            pstmt.setString(5, dpTanggalMulaiNonPemda.getValue() != null ? dpTanggalMulaiNonPemda.getValue().toString() : "");
-            pstmt.setString(6, dpTanggalBerakhirNonPemda.getValue() != null ? dpTanggalBerakhirNonPemda.getValue().toString() : "");
-            pstmt.setString(7, picMitra);
-            pstmt.setString(8, kontakPic);
-            pstmt.setString(9, picBlsdm);
-            pstmt.setString(10, filePath);
-            pstmt.setString(11, cbStatusNonPemda.getValue());
-            pstmt.setString(12, catatan.isEmpty() ? null : catatan);
-            pstmt.setInt(13, currentUserId);
+            pstmt.setString(2, nomorDokumenMitra.isEmpty() ? null : nomorDokumenMitra);  // ✅ BARU
+            pstmt.setString(3, pemilik.isEmpty() ? null : pemilik);  // ✅ BARU
+            pstmt.setString(4, jenisPerjanjian);
+            pstmt.setString(5, mitra);
+            pstmt.setString(6, jenisDokumenValue);
+            pstmt.setString(7, dpTanggalMulaiNonPemda.getValue() != null ? dpTanggalMulaiNonPemda.getValue().toString() : "");
+            pstmt.setString(8, dpTanggalBerakhirNonPemda.getValue() != null ? dpTanggalBerakhirNonPemda.getValue().toString() : "");
+            pstmt.setString(9, picMitra);
+            pstmt.setString(10, kontakPic);
+            pstmt.setString(11, picBlsdm);
+            pstmt.setString(12, filePath);
+            pstmt.setString(13, cbStatusNonPemda.getValue());
+            pstmt.setString(14, catatan.isEmpty() ? null : catatan);
+            pstmt.setInt(15, currentUserId);
 
             pstmt.executeUpdate();
             conn.close();

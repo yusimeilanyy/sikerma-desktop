@@ -388,7 +388,6 @@ public class AllDocumentsController {
         colDokumenFinal.setMaxWidth(80);
         colDokumenFinal.setMinWidth(80);
 
-        // MODIFIKASI: Kolom Aksi - hanya tampil untuk Admin
         colAksi.setCellFactory(param -> new TableCell<>() {
             @Override
             protected void updateItem(Void item, boolean empty) {
@@ -405,13 +404,11 @@ public class AllDocumentsController {
                     HBox hbox = new HBox(8);
                     hbox.setAlignment(Pos.CENTER);
 
-                    // Cek apakah user adalah Admin
                     boolean isAdmin = currentUserRole != null &&
                             (currentUserRole.equalsIgnoreCase("admin") ||
                                     currentUserRole.equalsIgnoreCase("administrator"));
 
                     if (isAdmin) {
-                        // Admin bisa Edit dan Hapus
                         Button btnEdit = new Button("✏️");
                         btnEdit.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; " +
                                 "-fx-cursor: hand; -fx-font-size: 14px; -fx-background-radius: 5; " +
@@ -428,7 +425,6 @@ public class AllDocumentsController {
 
                         hbox.getChildren().addAll(btnEdit, btnDelete);
                     }
-                    // Staff tidak menampilkan tombol apa-apa (kolom kosong)
 
                     setGraphic(hbox);
                     setAlignment(Pos.CENTER);
@@ -439,7 +435,6 @@ public class AllDocumentsController {
         colAksi.setMaxWidth(120);
         colAksi.setMinWidth(120);
 
-        // MODIFIKASI: Sembunyikan kolom Aksi untuk Staff/User
         boolean isAdmin = currentUserRole != null &&
                 (currentUserRole.equalsIgnoreCase("admin") ||
                         currentUserRole.equalsIgnoreCase("administrator"));
@@ -500,6 +495,12 @@ public class AllDocumentsController {
                 doc.setPicBlsdm(rs.getString("pic_blsdm"));
                 doc.setKeterangan(rs.getString("keterangan"));
                 doc.setFilePath(rs.getString("file_path"));
+
+                // ✅ TAMBAHAN BARU: Load 3 field baru dari database
+                doc.setNomorDokumenPemda(rs.getString("nomor_dokumen_pemda"));
+                doc.setNomorDokumenMitra(rs.getString("nomor_dokumen_mitra"));
+                doc.setPemilik(rs.getString("pemilik"));
+
                 documentList.add(doc);
             }
 

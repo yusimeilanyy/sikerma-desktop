@@ -129,30 +129,37 @@
                                    promptText="Email atau Nomor Telepon"
                                    style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 8 12;"/>
 
-                        <!-- Row 12 -->
-                        <Label text="Status" GridPane.columnIndex="0" GridPane.rowIndex="11"
+                        <!-- Row 12 - PEMILIK (BARU) -->
+                        <Label text="Pemilik" GridPane.columnIndex="0" GridPane.rowIndex="11"
                                style="-fx-font-weight: 600; -fx-text-fill: #334155; -fx-font-size: 13px;"/>
-                        <ComboBox fx:id="cbStatusPemda" GridPane.columnIndex="1" GridPane.rowIndex="11"
+                        <TextField fx:id="txtPemilikPemda" GridPane.columnIndex="1" GridPane.rowIndex="11"
+                                   promptText="Masukkan pemilik dokumen"
+                                   style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 8 12;"/>
+
+                        <!-- Row 13 - Status (sebelumnya 11) -->
+                        <Label text="Status" GridPane.columnIndex="0" GridPane.rowIndex="12"
+                               style="-fx-font-weight: 600; -fx-text-fill: #334155; -fx-font-size: 13px;"/>
+                        <ComboBox fx:id="cbStatusPemda" GridPane.columnIndex="1" GridPane.rowIndex="12"
                                   style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;"/>
 
-                        <!-- Row 13 -->
-                        <Label text="Tanggal Mulai" GridPane.columnIndex="0" GridPane.rowIndex="12"
+                        <!-- Row 14 - Tanggal Mulai (sebelumnya 12) -->
+                        <Label text="Tanggal Mulai" GridPane.columnIndex="0" GridPane.rowIndex="13"
                                style="-fx-font-weight: 600; -fx-text-fill: #334155; -fx-font-size: 13px;"/>
-                        <DatePicker fx:id="dpTanggalMulaiPemda" GridPane.columnIndex="1" GridPane.rowIndex="12"
+                        <DatePicker fx:id="dpTanggalMulaiPemda" GridPane.columnIndex="1" GridPane.rowIndex="13"
                                     promptText="Pilih tanggal mulai"
                                     style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 8 12;"/>
 
-                        <!-- Row 14 -->
-                        <Label text="Tanggal Berakhir" GridPane.columnIndex="0" GridPane.rowIndex="13"
+                        <!-- Row 15 - Tanggal Berakhir (sebelumnya 13) -->
+                        <Label text="Tanggal Berakhir" GridPane.columnIndex="0" GridPane.rowIndex="14"
                                style="-fx-font-weight: 600; -fx-text-fill: #334155; -fx-font-size: 13px;"/>
-                        <DatePicker fx:id="dpTanggalBerakhirPemda" GridPane.columnIndex="1" GridPane.rowIndex="13"
+                        <DatePicker fx:id="dpTanggalBerakhirPemda" GridPane.columnIndex="1" GridPane.rowIndex="14"
                                     promptText="Pilih tanggal berakhir"
                                     style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 8 12;"/>
 
-                        <!-- Row 15 - Upload File -->
-                        <Label text="Dokumen Pendukung" GridPane.columnIndex="0" GridPane.rowIndex="14" GridPane.columnSpan="2"
+                        <!-- Row 16 - Upload File (sebelumnya 14-15) -->
+                        <Label text="Dokumen Pendukung" GridPane.columnIndex="0" GridPane.rowIndex="15" GridPane.columnSpan="2"
                                style="-fx-font-weight: 600; -fx-text-fill: #334155; -fx-font-size: 13px;"/>
-                        <VBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="15" GridPane.columnSpan="2"
+                        <VBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="16" GridPane.columnSpan="2"
                               style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 15;">
                             <Button onAction="#handleChooseFilePemda" text="📎 Pilih file"
                                     style="-fx-background-color: white; -fx-text-fill: #475569; -fx-border-color: #e2e8f0; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 16; -fx-font-weight: 600; -fx-cursor: hand;"/>
@@ -162,10 +169,10 @@
                                    style="-fx-font-size: 11px; -fx-text-fill: #94a3b8;"/>
                         </VBox>
 
-                        <!-- Row 16 - Catatan -->
-                        <Label text="Catatan" GridPane.columnIndex="0" GridPane.rowIndex="16" GridPane.columnSpan="2"
+                        <!-- Row 17 - Catatan (sebelumnya 16-17) -->
+                        <Label text="Catatan" GridPane.columnIndex="0" GridPane.rowIndex="17" GridPane.columnSpan="2"
                                style="-fx-font-weight: 600; -fx-text-fill: #334155; -fx-font-size: 13px;"/>
-                        <TextArea fx:id="txtCatatanPemda" GridPane.columnIndex="0" GridPane.rowIndex="17" GridPane.columnSpan="2"
+                        <TextArea fx:id="txtCatatanPemda" GridPane.columnIndex="0" GridPane.rowIndex="18" GridPane.columnSpan="2"
                                   promptText="Masukkan catatan tambahan"
                                   prefRowCount="3"
                                   style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 8 12;"/>
@@ -249,30 +256,37 @@
                                    promptText="Email atau Nomor Telepon"
                                    style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 8 12;"/>
 
-                        <!-- Row 10 -->
-                        <Label text="Status" GridPane.columnIndex="0" GridPane.rowIndex="9"
+                        <!-- Row 10 - PEMILIK (BARU) -->
+                        <Label text="Pemilik" GridPane.columnIndex="0" GridPane.rowIndex="9"
                                style="-fx-font-weight: 600; -fx-text-fill: #334155; -fx-font-size: 13px;"/>
-                        <ComboBox fx:id="cbStatusNonPemda" GridPane.columnIndex="1" GridPane.rowIndex="9"
+                        <TextField fx:id="txtPemilikNonPemda" GridPane.columnIndex="1" GridPane.rowIndex="9"
+                                   promptText="Masukkan pemilik dokumen"
+                                   style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 8 12;"/>
+
+                        <!-- Row 11 - Status (sebelumnya 9) -->
+                        <Label text="Status" GridPane.columnIndex="0" GridPane.rowIndex="10"
+                               style="-fx-font-weight: 600; -fx-text-fill: #334155; -fx-font-size: 13px;"/>
+                        <ComboBox fx:id="cbStatusNonPemda" GridPane.columnIndex="1" GridPane.rowIndex="10"
                                   style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;"/>
 
-                        <!-- Row 11 -->
-                        <Label text="Tanggal Mulai" GridPane.columnIndex="0" GridPane.rowIndex="10"
+                        <!-- Row 12 - Tanggal Mulai (sebelumnya 10) -->
+                        <Label text="Tanggal Mulai" GridPane.columnIndex="0" GridPane.rowIndex="11"
                                style="-fx-font-weight: 600; -fx-text-fill: #334155; -fx-font-size: 13px;"/>
-                        <DatePicker fx:id="dpTanggalMulaiNonPemda" GridPane.columnIndex="1" GridPane.rowIndex="10"
+                        <DatePicker fx:id="dpTanggalMulaiNonPemda" GridPane.columnIndex="1" GridPane.rowIndex="11"
                                     promptText="Pilih tanggal mulai"
                                     style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 8 12;"/>
 
-                        <!-- Row 12 -->
-                        <Label text="Tanggal Berakhir" GridPane.columnIndex="0" GridPane.rowIndex="11"
+                        <!-- Row 13 - Tanggal Berakhir (sebelumnya 11) -->
+                        <Label text="Tanggal Berakhir" GridPane.columnIndex="0" GridPane.rowIndex="12"
                                style="-fx-font-weight: 600; -fx-text-fill: #334155; -fx-font-size: 13px;"/>
-                        <DatePicker fx:id="dpTanggalBerakhirNonPemda" GridPane.columnIndex="1" GridPane.rowIndex="11"
+                        <DatePicker fx:id="dpTanggalBerakhirNonPemda" GridPane.columnIndex="1" GridPane.rowIndex="12"
                                     promptText="Pilih tanggal berakhir"
                                     style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 8 12;"/>
 
-                        <!-- Row 13 - Upload File -->
-                        <Label text="Dokumen Pendukung" GridPane.columnIndex="0" GridPane.rowIndex="12" GridPane.columnSpan="2"
+                        <!-- Row 14 - Upload File (sebelumnya 12-13) -->
+                        <Label text="Dokumen Pendukung" GridPane.columnIndex="0" GridPane.rowIndex="13" GridPane.columnSpan="2"
                                style="-fx-font-weight: 600; -fx-text-fill: #334155; -fx-font-size: 13px;"/>
-                        <VBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="13" GridPane.columnSpan="2"
+                        <VBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="14" GridPane.columnSpan="2"
                               style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 15;">
                             <Button onAction="#handleChooseFileNonPemda" text="📎 Pilih file"
                                     style="-fx-background-color: white; -fx-text-fill: #475569; -fx-border-color: #e2e8f0; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 16; -fx-font-weight: 600; -fx-cursor: hand;"/>
@@ -282,10 +296,10 @@
                                    style="-fx-font-size: 11px; -fx-text-fill: #94a3b8;"/>
                         </VBox>
 
-                        <!-- Row 14 - Catatan -->
-                        <Label text="Catatan" GridPane.columnIndex="0" GridPane.rowIndex="14" GridPane.columnSpan="2"
+                        <!-- Row 15 - Catatan (sebelumnya 14-15) -->
+                        <Label text="Catatan" GridPane.columnIndex="0" GridPane.rowIndex="15" GridPane.columnSpan="2"
                                style="-fx-font-weight: 600; -fx-text-fill: #334155; -fx-font-size: 13px;"/>
-                        <TextArea fx:id="txtCatatanNonPemda" GridPane.columnIndex="0" GridPane.rowIndex="15" GridPane.columnSpan="2"
+                        <TextArea fx:id="txtCatatanNonPemda" GridPane.columnIndex="0" GridPane.rowIndex="16" GridPane.columnSpan="2"
                                   promptText="Masukkan catatan tambahan"
                                   prefRowCount="3"
                                   style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 8 12;"/>
