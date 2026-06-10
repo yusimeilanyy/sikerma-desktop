@@ -7,9 +7,9 @@ import java.sql.SQLException;
 public class DatabaseConfig {
 
     // GANTI PORT KE 3307 (sesuai hasil SHOW VARIABLES)
-    private static final String URL = "jdbc:mysql://localhost:3307/db_sikerma?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+    private static final String URL = "jdbc:mysql://localhost:3306/db_sikerma?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     private static final String USER = "root";
-    private static final String PASS = "4kun_database";
+    private static final String PASS = "Jere123";
 
     public static Connection connect() {
         try {

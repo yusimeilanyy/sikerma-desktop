@@ -71,28 +71,37 @@
                            style="-fx-font-size: 14px; -fx-text-fill: #64748b;" wrapText="true"/>
                 </VBox>
 
-                <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #fef2f2; -fx-border-color: #fecaca; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 18 24;">
-                    <StackPane style="-fx-background-color: #fee2e2; -fx-background-radius: 10; -fx-pref-width: 45; -fx-pref-height: 45;">
-                        <Text fill="#ef4444" text="!" style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
-                    </StackPane>
-                    <VBox spacing="4">
-                        <Label text="Dokumen Perlu Perhatian" style="-fx-font-weight: bold; -fx-text-fill: #991b1b;"/>
-                        <Label text="Klik untuk selengkapnya" style="-fx-font-size: 12px; -fx-text-fill: #b91c1c;"/>
+                <!-- DOKUMEN PERLU PERHATIAN - Expandable Section -->
+                <VBox spacing="0">
+                    <HBox fx:id="alertBanner" onMouseClicked="#handleToggleAlert" alignment="CENTER_LEFT" spacing="20"
+                           style="-fx-background-color: #fef2f2; -fx-border-color: #fecaca; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 18 24; -fx-cursor: hand;">
+                        <StackPane style="-fx-background-color: #fee2e2; -fx-background-radius: 10; -fx-pref-width: 45; -fx-pref-height: 45;">
+                            <Text fill="#ef4444" text="⚠" style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
+                        </StackPane>
+                        <VBox spacing="4">
+                            <Label text="Dokumen Perlu Perhatian" style="-fx-font-weight: bold; -fx-text-fill: #991b1b; -fx-font-size: 15px;"/>
+                            <Label fx:id="lblAlertToggle" text="Klik untuk selengkapnya" style="-fx-font-size: 12px; -fx-text-fill: #b91c1c;"/>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <VBox spacing="2" alignment="CENTER_RIGHT">
+                            <Label text="MENDESAK" style="-fx-font-size: 10px; -fx-text-fill: #ef4444; -fx-font-weight: bold;"/>
+                            <Label fx:id="lblMendesak" text="0" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ef4444;"/>
+                        </VBox>
+                        <VBox spacing="2" alignment="CENTER_RIGHT" style="-fx-padding: 0 20 0 20;">
+                            <Label text="PERINGATAN" style="-fx-font-size: 10px; -fx-text-fill: #f97316; -fx-font-weight: bold;"/>
+                            <Label fx:id="lblPeringatan" text="0" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #f97316;"/>
+                        </VBox>
+                        <VBox spacing="2" alignment="CENTER_RIGHT">
+                            <Label text="TOTAL" style="-fx-font-size: 10px; -fx-text-fill: #1e293b; -fx-font-weight: bold;"/>
+                            <Label fx:id="lblTotalAlert" text="0" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Expandable detail section -->
+                    <VBox fx:id="alertDetailContainer" visible="false" managed="false" spacing="20"
+                           style="-fx-background-color: #fefefe; -fx-border-color: #e2e8f0; -fx-border-width: 0 1 1 1; -fx-border-radius: 0 0 12 12; -fx-background-radius: 0 0 12 12; -fx-padding: 24;">
                     </VBox>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <VBox spacing="2" alignment="CENTER_RIGHT">
-                        <Label text="MENDESAK" style="-fx-font-size: 10px; -fx-text-fill: #ef4444; -fx-font-weight: bold;"/>
-                        <Label fx:id="lblMendesak" text="1" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ef4444;"/>
-                    </VBox>
-                    <VBox spacing="2" alignment="CENTER_RIGHT" style="-fx-padding: 0 20 0 20;">
-                        <Label text="PERINGATAN" style="-fx-font-size: 10px; -fx-text-fill: #f97316; -fx-font-weight: bold;"/>
-                        <Label fx:id="lblPeringatan" text="0" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #f97316;"/>
-                    </VBox>
-                    <VBox spacing="2" alignment="CENTER_RIGHT">
-                        <Label text="TOTAL" style="-fx-font-size: 10px; -fx-text-fill: #1e293b; -fx-font-weight: bold;"/>
-                        <Label fx:id="lblTotalAlert" text="1" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
-                    </VBox>
-                </HBox>
+                </VBox>
 
                 <HBox spacing="20">
                     <VBox fx:id="cardMou" onMouseClicked="#handleCardMouClick" style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24; -fx-min-width: 200; -fx-cursor: hand;" HBox.hgrow="ALWAYS">
@@ -200,14 +209,14 @@
                             <Label text="Status aktif vs kadaluarsa" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
 
                             <StackPane VBox.vgrow="ALWAYS" style="-fx-padding: 20 0 0 0;">
-                                <BarChart fx:id="barChartMoUPks" alternativeRowFillVisible="false" horizontalGridLinesVisible="true" verticalGridLinesVisible="false" legendVisible="true">
+                                <StackedBarChart fx:id="barChartMoUPks" alternativeRowFillVisible="false" horizontalGridLinesVisible="true" verticalGridLinesVisible="false" legendVisible="true">
                                     <xAxis>
                                         <CategoryAxis side="BOTTOM" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
                                     </xAxis>
                                     <yAxis>
                                         <NumberAxis side="LEFT" style="-fx-font-size: 12px; -fx-text-fill: #64748b;" tickUnit="1"/>
                                     </yAxis>
-                                </BarChart>
+                                </StackedBarChart>
                             </StackPane>
                         </VBox>
 
@@ -221,14 +230,14 @@
                             <Label text="Berdasarkan tanggal mulai kerja sama" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
 
                             <StackPane VBox.vgrow="ALWAYS" style="-fx-padding: 20 0 0 0;">
-                                <LineChart fx:id="lineChartTren" alternativeColumnFillVisible="false" horizontalGridLinesVisible="true" verticalGridLinesVisible="false" legendVisible="true">
+                                <AreaChart fx:id="areaChartTren" alternativeColumnFillVisible="false" horizontalGridLinesVisible="true" verticalGridLinesVisible="false" legendVisible="true">
                                     <xAxis>
                                         <CategoryAxis side="BOTTOM" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
                                     </xAxis>
                                     <yAxis>
                                         <NumberAxis side="LEFT" style="-fx-font-size: 12px; -fx-text-fill: #64748b;" tickUnit="1"/>
                                     </yAxis>
-                                </LineChart>
+                                </AreaChart>
                             </StackPane>
                         </VBox>
                     </HBox>

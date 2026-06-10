@@ -114,3 +114,83 @@
     -fx-border: 1px solid #cbd5e1;
 }
 
+/* ===== Chart Styling ===== */
+
+/* Make chart plot background transparent */
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+/* Horizontal grid lines styling */
+.chart-horizontal-grid-lines {
+    -fx-stroke: #e2e8f0;
+    -fx-stroke-dash-array: 4 4;
+}
+
+.chart-vertical-grid-lines {
+    -fx-stroke: transparent;
+}
+
+/* StackedBarChart - Aktif series (teal) */
+.default-color0.chart-bar {
+    -fx-background-color: #07b8af;
+    -fx-background-radius: 4 4 0 0;
+}
+
+/* StackedBarChart - Kadaluarsa series (orange) */
+.default-color1.chart-bar {
+    -fx-background-color: #FF6B35;
+    -fx-background-radius: 4 4 0 0;
+}
+
+/* AreaChart - MoU Baru series (teal) */
+.default-color0.chart-series-area-line {
+    -fx-stroke: #07b8af;
+    -fx-stroke-width: 2.5px;
+}
+
+.default-color0.chart-series-area-fill {
+    -fx-fill: rgba(7, 184, 175, 0.2);
+}
+
+.default-color0.chart-area-symbol {
+    -fx-background-color: #07b8af, white;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 5px;
+    -fx-padding: 4px;
+}
+
+/* AreaChart - PKS Baru series (orange) */
+.default-color1.chart-series-area-line {
+    -fx-stroke: #FF6B35;
+    -fx-stroke-width: 2.5px;
+}
+
+.default-color1.chart-series-area-fill {
+    -fx-fill: rgba(255, 107, 53, 0.2);
+}
+
+.default-color1.chart-area-symbol {
+    -fx-background-color: #FF6B35, white;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 5px;
+    -fx-padding: 4px;
+}
+
+/* Legend symbol colors */
+.default-color0.chart-legend-item-symbol {
+    -fx-background-color: #07b8af;
+    -fx-background-radius: 8px;
+}
+
+.default-color1.chart-legend-item-symbol {
+    -fx-background-color: #FF6B35;
+    -fx-background-radius: 8px;
+}
+
+/* Legend styling */
+.chart-legend {
+    -fx-background-color: transparent;
+    -fx-padding: 10 0 0 0;
+}
+
