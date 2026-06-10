@@ -127,6 +127,7 @@ public class LoginController {
             BorderPane root = loader.load();
 
             Scene scene = new Scene(root, 1400, 800);
+            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
 
             DashboardController controller = loader.getController();
             controller.setUserData(userId, fullName, role);
