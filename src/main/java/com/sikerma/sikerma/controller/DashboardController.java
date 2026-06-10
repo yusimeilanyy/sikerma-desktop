@@ -3,6 +3,7 @@ package com.sikerma.sikerma.controller;
 import com.sikerma.sikerma.config.DatabaseConfig;
 import com.sikerma.sikerma.model.Document;
 import com.sikerma.sikerma.model.RenewalHistory;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -23,8 +24,13 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import javafx.scene.shape.CubicCurveTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
+import javafx.scene.shape.PathElement;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -493,6 +499,20 @@ public class DashboardController {
         yAxis.setStyle("-fx-font-size: 11px; -fx-text-fill: #64748b;");
         yAxis.setTickLabelFill(javafx.scene.paint.Color.web("#64748b"));
         yAxis.setTickUnit(1);
+        yAxis.setMinorTickVisible(false);
+        yAxis.setTickLabelFormatter(new StringConverter<Number>() {
+            @Override
+            public String toString(Number object) {
+                if (object.doubleValue() == object.intValue()) {
+                    return String.valueOf(object.intValue());
+                }
+                return "";
+            }
+            @Override
+            public Number fromString(String string) {
+                return Integer.parseInt(string);
+            }
+        });
     }
 
     private void setupAreaChart() {
@@ -511,6 +531,20 @@ public class DashboardController {
         yAxis.setStyle("-fx-font-size: 11px;");
         yAxis.setTickLabelFill(javafx.scene.paint.Color.web("#64748b"));
         yAxis.setTickUnit(1);
+        yAxis.setMinorTickVisible(false);
+        yAxis.setTickLabelFormatter(new StringConverter<Number>() {
+            @Override
+            public String toString(Number object) {
+                if (object.doubleValue() == object.intValue()) {
+                    return String.valueOf(object.intValue());
+                }
+                return "";
+            }
+            @Override
+            public Number fromString(String string) {
+                return Integer.parseInt(string);
+            }
+        });
 
         areaChartTren.setLegendSide(javafx.geometry.Side.BOTTOM);
         Node legend = areaChartTren.lookup(".chart-legend");
@@ -589,39 +623,35 @@ public class DashboardController {
         final String ORANGE_COLOR = "#FF6B35";
         final String ORANGE_SHADOW = "rgba(255, 107, 53, 0.3)";
 
-        if (barChartMoUPks.getData().size() > 0) {
-            barChartMoUPks.getData().get(0).getNode().setStyle(
-                    "-fx-bar-fill: " + TEAL_COLOR + "; -fx-background-color: " + TEAL_COLOR + ";"
-            );
-
-            for (XYChart.Data<String, Number> data : barChartMoUPks.getData().get(0).getData()) {
-                Node node = data.getNode();
-                if (node != null) {
-                    node.setStyle(
-                            "-fx-background-color: " + TEAL_COLOR + "; " +
-                                    "-fx-background-radius: 8 8 0 0; " +
-                                    "-fx-effect: dropshadow(gaussian, " + TEAL_SHADOW + ", 8, 0, 0, 2);"
-                    );
+        Platform.runLater(() -> {
+            // Series 0 = Aktif (teal) - bottom of stacked bar, no rounded corners on top
+            if (barChartMoUPks.getData().size() > 0) {
+                for (XYChart.Data<String, Number> data : barChartMoUPks.getData().get(0).getData()) {
+                    Node node = data.getNode();
+                    if (node != null) {
+                        node.setStyle(
+                                "-fx-background-color: " + TEAL_COLOR + "; " +
+                                        "-fx-background-radius: 0 0 0 0; " +
+                                        "-fx-effect: dropshadow(gaussian, " + TEAL_SHADOW + ", 8, 0, 0, 2);"
+                        );
+                    }
                 }
             }
-        }
 
-        if (barChartMoUPks.getData().size() > 1) {
-            barChartMoUPks.getData().get(1).getNode().setStyle(
-                    "-fx-bar-fill: " + ORANGE_COLOR + "; -fx-background-color: " + ORANGE_COLOR + ";"
-            );
-
-            for (XYChart.Data<String, Number> data : barChartMoUPks.getData().get(1).getData()) {
-                Node node = data.getNode();
-                if (node != null) {
-                    node.setStyle(
-                            "-fx-background-color: " + ORANGE_COLOR + "; " +
-                                    "-fx-background-radius: 8 8 0 0; " +
-                                    "-fx-effect: dropshadow(gaussian, " + ORANGE_SHADOW + ", 8, 0, 0, 2);"
-                    );
+            // Series 1 = Kadaluarsa (orange) - top of stacked bar, rounded top corners
+            if (barChartMoUPks.getData().size() > 1) {
+                for (XYChart.Data<String, Number> data : barChartMoUPks.getData().get(1).getData()) {
+                    Node node = data.getNode();
+                    if (node != null) {
+                        node.setStyle(
+                                "-fx-background-color: " + ORANGE_COLOR + "; " +
+                                        "-fx-background-radius: 8 8 0 0; " +
+                                        "-fx-effect: dropshadow(gaussian, " + ORANGE_SHADOW + ", 8, 0, 0, 2);"
+                        );
+                    }
                 }
             }
-        }
+        });
     }
 
     private void updateAreaChart() {
@@ -671,62 +701,157 @@ public class DashboardController {
         final String ORANGE_FILL = "rgba(255, 107, 53, 0.2)";
         final String ORANGE_SHADOW = "rgba(255, 107, 53, 0.4)";
 
-        // Style MoU Baru series (teal area)
-        if (areaChartTren.getData().size() > 0) {
-            XYChart.Series<String, Number> seriesMoU = areaChartTren.getData().get(0);
-            Node seriesNode = seriesMoU.getNode();
-            if (seriesNode != null) {
-                // The series node in AreaChart is a Group containing the fill Path and stroke Path
-                seriesNode.lookup(".chart-series-area-line").setStyle(
-                        "-fx-stroke: " + TEAL_COLOR + "; -fx-stroke-width: 2.5px;"
-                );
-                seriesNode.lookup(".chart-series-area-fill").setStyle(
-                        "-fx-fill: " + TEAL_FILL + ";"
-                );
-            }
+        // Force CSS and layout pass first so chart creates all Path nodes,
+        // then apply styling and smoothing in a second deferred pass
+        Platform.runLater(() -> {
+            areaChartTren.applyCss();
+            areaChartTren.layout();
 
-            // Style data point symbols
-            for (XYChart.Data<String, Number> data : seriesMoU.getData()) {
-                Node node = data.getNode();
-                if (node != null) {
-                    node.setStyle(
-                            "-fx-background-color: " + TEAL_COLOR + ", white; " +
-                                    "-fx-background-insets: 0, 2; " +
-                                    "-fx-background-radius: 5px; " +
-                                    "-fx-padding: 4px; " +
-                                    "-fx-effect: dropshadow(gaussian, " + TEAL_SHADOW + ", 4, 0, 0, 1);"
-                    );
+            Platform.runLater(() -> {
+                // Style and smooth MoU Baru series (teal area)
+                if (areaChartTren.getData().size() > 0) {
+                    XYChart.Series<String, Number> seriesMoU = areaChartTren.getData().get(0);
+                    int dataCount0 = seriesMoU.getData().size();
+                    Node seriesNode = seriesMoU.getNode();
+                    if (seriesNode != null) {
+                        Node areaLine = seriesNode.lookup(".chart-series-area-line");
+                        if (areaLine != null) {
+                            areaLine.setStyle(
+                                    "-fx-stroke: " + TEAL_COLOR + "; -fx-stroke-width: 2.5px;"
+                            );
+                            if (areaLine instanceof Path) {
+                                smoothPath((Path) areaLine, dataCount0);
+                            }
+                        }
+                        Node areaFill = seriesNode.lookup(".chart-series-area-fill");
+                        if (areaFill != null) {
+                            areaFill.setStyle(
+                                    "-fx-fill: " + TEAL_FILL + ";"
+                            );
+                            if (areaFill instanceof Path) {
+                                smoothPath((Path) areaFill, dataCount0);
+                            }
+                        }
+                    }
+
+                    // Style data point symbols
+                    for (XYChart.Data<String, Number> data : seriesMoU.getData()) {
+                        Node node = data.getNode();
+                        if (node != null) {
+                            node.setStyle(
+                                    "-fx-background-color: " + TEAL_COLOR + ", white; " +
+                                            "-fx-background-insets: 0, 2; " +
+                                            "-fx-background-radius: 5px; " +
+                                            "-fx-padding: 4px; " +
+                                            "-fx-effect: dropshadow(gaussian, " + TEAL_SHADOW + ", 4, 0, 0, 1);"
+                            );
+                        }
+                    }
                 }
+
+                // Style and smooth PKS Baru series (orange area)
+                if (areaChartTren.getData().size() > 1) {
+                    XYChart.Series<String, Number> seriesPKS = areaChartTren.getData().get(1);
+                    int dataCount1 = seriesPKS.getData().size();
+                    Node seriesNode = seriesPKS.getNode();
+                    if (seriesNode != null) {
+                        Node areaLine = seriesNode.lookup(".chart-series-area-line");
+                        if (areaLine != null) {
+                            areaLine.setStyle(
+                                    "-fx-stroke: " + ORANGE_COLOR + "; -fx-stroke-width: 2.5px;"
+                            );
+                            if (areaLine instanceof Path) {
+                                smoothPath((Path) areaLine, dataCount1);
+                            }
+                        }
+                        Node areaFill = seriesNode.lookup(".chart-series-area-fill");
+                        if (areaFill != null) {
+                            areaFill.setStyle(
+                                    "-fx-fill: " + ORANGE_FILL + ";"
+                            );
+                            if (areaFill instanceof Path) {
+                                smoothPath((Path) areaFill, dataCount1);
+                            }
+                        }
+                    }
+
+                    // Style data point symbols
+                    for (XYChart.Data<String, Number> data : seriesPKS.getData()) {
+                        Node node = data.getNode();
+                        if (node != null) {
+                            node.setStyle(
+                                    "-fx-background-color: " + ORANGE_COLOR + ", white; " +
+                                            "-fx-background-insets: 0, 2; " +
+                                            "-fx-background-radius: 5px; " +
+                                            "-fx-padding: 4px; " +
+                                            "-fx-effect: dropshadow(gaussian, " + ORANGE_SHADOW + ", 4, 0, 0, 1);"
+                            );
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    /**
+     * Converts straight-line segments in a Path to smooth cubic Bezier curves
+     * using Catmull-Rom spline interpolation. Only smooths the top data-point
+     * segments, leaving the bottom fill border of area charts unchanged.
+     *
+     * @param path           the Path to smooth
+     * @param numDataPoints  how many data points form the top curve
+     */
+    private void smoothPath(Path path, int numDataPoints) {
+        javafx.collections.ObservableList<PathElement> elements = path.getElements();
+        if (elements.size() < 3) return;
+
+        // Extract all coordinate points from the top curve (MoveTo + LineTo)
+        List<double[]> points = new ArrayList<>();
+        int elementIndex = 0;
+
+        for (PathElement elem : elements) {
+            if (points.size() >= numDataPoints) break;
+            if (elem instanceof MoveTo) {
+                MoveTo mt = (MoveTo) elem;
+                points.add(new double[]{mt.getX(), mt.getY()});
+            } else if (elem instanceof javafx.scene.shape.LineTo) {
+                javafx.scene.shape.LineTo lt = (javafx.scene.shape.LineTo) elem;
+                points.add(new double[]{lt.getX(), lt.getY()});
             }
+            elementIndex++;
         }
 
-        // Style PKS Baru series (orange area)
-        if (areaChartTren.getData().size() > 1) {
-            XYChart.Series<String, Number> seriesPKS = areaChartTren.getData().get(1);
-            Node seriesNode = seriesPKS.getNode();
-            if (seriesNode != null) {
-                seriesNode.lookup(".chart-series-area-line").setStyle(
-                        "-fx-stroke: " + ORANGE_COLOR + "; -fx-stroke-width: 2.5px;"
-                );
-                seriesNode.lookup(".chart-series-area-fill").setStyle(
-                        "-fx-fill: " + ORANGE_FILL + ";"
-                );
-            }
+        if (points.size() < 3) return;
 
-            // Style data point symbols
-            for (XYChart.Data<String, Number> data : seriesPKS.getData()) {
-                Node node = data.getNode();
-                if (node != null) {
-                    node.setStyle(
-                            "-fx-background-color: " + ORANGE_COLOR + ", white; " +
-                                    "-fx-background-insets: 0, 2; " +
-                                    "-fx-background-radius: 5px; " +
-                                    "-fx-padding: 4px; " +
-                                    "-fx-effect: dropshadow(gaussian, " + ORANGE_SHADOW + ", 4, 0, 0, 1);"
-                    );
-                }
-            }
+        // Build new smooth path elements
+        List<PathElement> newElements = new ArrayList<>();
+        // Keep the original MoveTo
+        newElements.add(new MoveTo(points.get(0)[0], points.get(0)[1]));
+
+        // Convert each LineTo to a CubicCurveTo using Catmull-Rom to Bezier
+        for (int i = 1; i < points.size(); i++) {
+            double[] pPrev = points.get(Math.max(0, i - 2));
+            double[] p0 = points.get(i - 1);
+            double[] p1 = points.get(i);
+            double[] pNext = points.get(Math.min(points.size() - 1, i + 1));
+
+            // Catmull-Rom to cubic Bezier control points
+            double cp1x = p0[0] + (p1[0] - pPrev[0]) / 6.0;
+            double cp1y = p0[1] + (p1[1] - pPrev[1]) / 6.0;
+            double cp2x = p1[0] - (pNext[0] - p0[0]) / 6.0;
+            double cp2y = p1[1] - (pNext[1] - p0[1]) / 6.0;
+
+            newElements.add(new CubicCurveTo(cp1x, cp1y, cp2x, cp2y, p1[0], p1[1]));
         }
+
+        // Append remaining elements unchanged (bottom border of fill path)
+        int topElementCount = points.size(); // MoveTo + (n-1) LineTo = n elements total
+        for (int i = topElementCount; i < elements.size(); i++) {
+            newElements.add(elements.get(i));
+        }
+
+        elements.clear();
+        elements.addAll(newElements);
     }
 
     private String getMonthName(int month) {
