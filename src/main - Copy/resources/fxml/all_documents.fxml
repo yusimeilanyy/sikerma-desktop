@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.sikerma.sikerma.controller.AllDocumentsController"
+            style="-fx-background-color: #f8fafc;">
+
+    <!-- MAIN CONTENT -->
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-width: 0;">
+            <VBox spacing="20" style="-fx-padding: 30 40 40 40; -fx-background-color: #f8fafc;">
+
+                <!-- Header -->
+                <VBox spacing="8">
+                    <Label text="Manajemen Dokumen" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                    <Label text="Kelola seluruh dokumen kerja sama, pantau masa berlaku, dan lakukan tindakan perpanjangan atau pembaharuan"
+                           style="-fx-font-size: 14px; -fx-text-fill: #64748b;" wrapText="true"/>
+                </VBox>
+
+                <!-- Tab Selector -->
+                <HBox spacing="0" style="-fx-background-color: #f1f5f9; -fx-background-radius: 10; -fx-padding: 4;">
+                    <Button fx:id="btnPemda" text="🏛 Pemerintah Daerah" onAction="#showPemdaDocuments"
+                            style="-fx-background-color: #0d9488; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 12 30; -fx-cursor: hand;"/>
+                    <Button fx:id="btnNonPemda" text="🏢 Non-Pemerintah Daerah" onAction="#showNonPemdaDocuments"
+                            style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 12 30; -fx-cursor: hand;"/>
+                </HBox>
+
+                <!-- Content Card -->
+                <VBox spacing="20" style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24;">
+
+                    <!-- Section Header -->
+                    <VBox spacing="4">
+                        <Label fx:id="lblSectionTitle" text="Instansi Pemerintah Daerah" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                        <Label fx:id="lblSectionDesc" text="Pengelolaan dokumen kerja sama dengan Pemerintah Daerah beserta perangkat daerah"
+                               style="-fx-font-size: 13px; -fx-text-fill: #64748b;" wrapText="true"/>
+                    </VBox>
+
+                    <!-- Toolbar -->
+                    <HBox alignment="CENTER_LEFT" spacing="15">
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label text="Riwayat Dokumen" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                            <Label fx:id="lblTotalDocs" text="(6)" style="-fx-font-size: 14px; -fx-text-fill: #64748b;"/>
+                        </HBox>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <ComboBox fx:id="cbStatusFilter" prefWidth="160"
+                                  style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 8 12;"/>
+                        <TextField fx:id="txtSearch" promptText="Cari dokumen..."
+                                   style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 8 12; -fx-pref-width: 220;"/>
+                        <Button text="🔍" onAction="#handleSearch"
+                                style="-fx-background-color: #0d9488; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand; -fx-font-size: 14px;"/>
+                    </HBox>
+
+                    <!-- Table -->
+                    <TableView fx:id="tableDocuments" VBox.vgrow="ALWAYS"
+                               style="-fx-background-color: transparent; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;">
+                        <columns>
+                            <TableColumn fx:id="colJenisPerjanjian" text="Jenis Perjanjian" prefWidth="100" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colTingkatKerjaSama" text="Tingkat Kerja Sama" prefWidth="180" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colJenisDokumen" text="Jenis Dokumen" prefWidth="130" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colPicBpsdmp" text="PIC BPSDMP" prefWidth="120" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colPicPemda" text="PIC PEMDA" prefWidth="130" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colTanggalMulai" text="Tanggal Mulai" prefWidth="110" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colTanggalBerakhir" text="Tanggal Berakhir" prefWidth="110" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colStatus" text="Status" prefWidth="150" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colCatatan" text="Catatan" prefWidth="100" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colDokumenFinal" text="Dokumen Final" prefWidth="80" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colAksi" text="Aksi" prefWidth="120" resizable="false" reorderable="false"/>
+                        </columns>
+                    </TableView>
+
+                    <!-- Pagination -->
+                    <HBox alignment="CENTER_LEFT" spacing="15">
+                        <Label text="Menampilkan 1 - 6 dari 6 dokumen" style="-fx-font-size: 13px; -fx-text-fill: #64748b;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <HBox spacing="5" alignment="CENTER">
+                            <Button text="&lt;" style="-fx-background-color: white; -fx-text-fill: #64748b; -fx-border-color: #e2e8f0; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-cursor: hand;"/>
+                            <Button text="1" style="-fx-background-color: #eff6ff; -fx-text-fill: #2563eb; -fx-border-color: #bfdbfe; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-cursor: hand; -fx-font-weight: bold;"/>
+                            <Button text="&gt;" style="-fx-background-color: white; -fx-text-fill: #64748b; -fx-border-color: #e2e8f0; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-cursor: hand;"/>
+                        </HBox>
+                        <ComboBox value="10 / halaman" prefWidth="110"
+                                  style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 10;"/>
+                    </HBox>
+
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

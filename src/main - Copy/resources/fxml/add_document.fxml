@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.sikerma.sikerma.controller.AddPemdaDocumentController"
+      style="-fx-background-color: #f8fafc;">
+
+    <!-- HEADER -->
+    <HBox style="-fx-background-color: white; -fx-padding: 20 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);" alignment="CENTER_LEFT" spacing="20">
+        <Button onAction="#handleBack" style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-cursor: hand; -fx-padding: 8 15; -fx-background-radius: 6;" text="← Kembali"/>
+        <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1e3a8a;" text="Tambah Dokumen Pemerintah Daerah"/>
+    </HBox>
+
+    <!-- FORM CONTENT -->
+    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-width: 0;">
+        <VBox spacing="20" style="-fx-padding: 25;">
+
+            <!-- Jenis Perjanjian -->
+            <VBox spacing="5">
+                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Jenis Perjanjian *"/>
+                <ComboBox fx:id="cbJenisPerjanjian" promptText="MoU (Memorandum of Understanding)" styleClass="input-field"/>
+            </VBox>
+
+            <!-- Tingkat Kerja Sama & Jenis Dokumen -->
+            <HBox spacing="15">
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Tingkat Kerja Sama"/>
+                    <ComboBox fx:id="cbTingkatKerjaSama" promptText="Pilih tingkat" styleClass="input-field"/>
+                </VBox>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Jenis Dokumen"/>
+                    <ComboBox fx:id="cbJenisDokumen" promptText="Pilih jenis dokumen" styleClass="input-field"/>
+                </VBox>
+            </HBox>
+
+            <!-- PIC BLSDM Komdigi Manado -->
+            <VBox spacing="5">
+                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="PIC BLSDM Komdigi Manado"/>
+                <ComboBox fx:id="cbPICBLSMDM" promptText="Pilih PIC BLSDM Komdigi Manado" styleClass="input-field"/>
+            </VBox>
+
+            <!-- Nomor Dokumen Balai & Pemerintah Daerah -->
+            <HBox spacing="15">
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Nomor Dokumen Balai"/>
+                    <TextField fx:id="txtNomorDokumenBalai" promptText="Masukkan nomor dokumen" styleClass="input-field"/>
+                </VBox>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Nomor Dokumen Pemerintah Daerah"/>
+                    <TextField fx:id="txtNomorDokumenPemda" promptText="Masukkan nomor dokumen" styleClass="input-field"/>
+                </VBox>
+            </HBox>
+
+            <!-- PIC Pemerintah Daerah & Kontak -->
+            <HBox spacing="15">
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="PIC Pemerintah Daerah"/>
+                    <TextField fx:id="txtPICPemda" promptText="Masukkan nama PIC" styleClass="input-field"/>
+                </VBox>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Kontak PIC Pemerintah Daerah"/>
+                    <TextField fx:id="txtKontakPICPemda" promptText="Masukkan email atau nomor telepon" styleClass="input-field"/>
+                </VBox>
+            </HBox>
+
+            <!-- Pemilik -->
+            <VBox spacing="5">
+                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Pemilik"/>
+                <TextField fx:id="txtPemilik" promptText="Masukkan nama pemilik" styleClass="input-field"/>
+            </VBox>
+
+            <!-- Status -->
+            <VBox spacing="5">
+                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Status"/>
+                <ComboBox fx:id="cbStatus" promptText="Baru" styleClass="input-field"/>
+            </VBox>
+
+            <!-- Tanggal Mulai & Berakhir -->
+            <HBox spacing="15">
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Tanggal Mulai Kerja Sama"/>
+                    <DatePicker fx:id="dpTanggalMulai" promptText="dd/mm/tttt" styleClass="input-field"/>
+                </VBox>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Tanggal Berakhir Kerja Sama"/>
+                    <DatePicker fx:id="dpTanggalBerakhir" promptText="dd/mm/tttt" styleClass="input-field"/>
+                </VBox>
+            </HBox>
+
+            <!-- Upload Dokumen -->
+            <VBox spacing="10">
+                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Dokumen Final (Upload)"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Button onAction="#handleChooseFile" styleClass="btn-secondary" text="Pilih File"/>
+                    <Label fx:id="lblFileName" style="-fx-text-fill: #64748b;" text="Tidak ada file yang dipilih" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <Label style="-fx-font-size: 11px; -fx-text-fill: #94a3b8;" text="Format file yang diizinkan : PDF atau .doc/.docx"/>
+                <Label style="-fx-font-size: 11px; -fx-text-fill: #94a3b8;" text="Maksimal ukuran file : 10 MB"/>
+            </VBox>
+
+            <!-- Catatan -->
+            <VBox spacing="5">
+                <Label style="-fx-font-weight: bold; -fx-text-fill: #334155;" text="Catatan"/>
+                <TextArea fx:id="txtCatatan" prefHeight="80" promptText="Tulis catatan tambahan (opsional)" styleClass="input-field"/>
+            </VBox>
+
+            <!-- Tombol -->
+            <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+                <Button onAction="#handleCancel" styleClass="btn-cancel" text="Batal"/>
+                <Button onAction="#handleSave" styleClass="btn-primary" text="Simpan Dokumen"/>
+            </HBox>
+
+        </VBox>
+    </ScrollPane>
+
+</VBox>

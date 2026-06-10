@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.sikerma.sikerma.controller.LoginController"
+      alignment="CENTER" spacing="0"
+      style="-fx-background-color: #F0F9FF;">
+
+    <VBox alignment="TOP_CENTER" spacing="20"
+          style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 2); -fx-padding: 35 40;"
+          maxWidth="420">
+
+        <VBox alignment="CENTER" spacing="8" style="-fx-padding: 0 0 5 0;">
+            <ImageView fitHeight="250" fitWidth="250" preserveRatio="true">
+                <image>
+                    <Image url="@../images/SIKERMA.png"/>
+                </image>
+            </ImageView>
+        </VBox>
+
+        <VBox alignment="CENTER" spacing="6" style="-fx-padding: 0 0 5 0;">
+            <Label text="Masuk ke akun Anda untuk melanjutkan"
+                   style="-fx-font-size: 14px; -fx-font-weight: 400; -fx-text-fill: #0F172A;"/>
+        </VBox>
+
+        <VBox spacing="18" style="-fx-padding: 0 0 5 0;">
+
+            <VBox spacing="6">
+                <HBox alignment="CENTER_LEFT" spacing="4">
+                    <Label text="Username" style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #1E3A8A;"/>
+                    <Label text="*" style="-fx-font-size: 13px; -fx-text-fill: #EF4444;"/>
+                </HBox>
+                <TextField fx:id="txtUsername" promptText="Masukkan username"
+                           style="-fx-background-color: #F8FAFC; -fx-border-color: #E2E8F0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 14; -fx-font-size: 13px; -fx-pref-width: 340;"/>
+                <Label text="Gunakan akun yang terdaftar"
+                       style="-fx-font-size: 11px; -fx-text-fill: #64748B;"/>
+            </VBox>
+
+            <VBox spacing="6">
+                <HBox alignment="CENTER_LEFT" spacing="4">
+                    <Label text="Password" style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #1E3A8A;"/>
+                    <Label text="*" style="-fx-font-size: 13px; -fx-text-fill: #EF4444;"/>
+                </HBox>
+                <PasswordField fx:id="txtPassword" promptText="Masukkan password"
+                               style="-fx-background-color: #F8FAFC; -fx-border-color: #E2E8F0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 14; -fx-font-size: 13px; -fx-pref-width: 340;"/>
+            </VBox>
+
+            <Label fx:id="lblMessage" wrapText="true" maxWidth="340"
+                   style="-fx-font-size: 12px; -fx-text-fill: #DC2626; -fx-font-weight: 500; -fx-padding: 8 0;"/>
+
+            <Button onAction="#handleLogin" text="Masuk"
+                    style="-fx-background-color: #14B8A6; -fx-text-fill: white; -fx-font-weight: 700; -fx-font-size: 14px; -fx-background-radius: 8; -fx-padding: 14; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(20, 184, 166, 0.3), 6, 0, 0, 1);"
+                    maxWidth="340"/>
+
+        </VBox>
+    </VBox>
+</VBox>
