@@ -16,7 +16,7 @@
                     onAction="#handleKembali"/>
             <Label text="Riwayat Perpanjangan" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
         </HBox>
-        <Label text="Riwayat perpanjangan dokumen."
+        <Label text="Riwayat perpanjangan dokumen"
                style="-fx-font-size: 14px; -fx-text-fill: #64748b;" wrapText="true"/>
     </VBox>
 

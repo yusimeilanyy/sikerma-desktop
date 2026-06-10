@@ -137,7 +137,6 @@ public class UserManagementController {
                     Button btnDelete = new Button("🗑️");
                     btnDelete.setStyle("-fx-background-color: transparent; -fx-text-fill: #ef4444; " +
                             "-fx-cursor: hand; -fx-font-size: 14px;");
-                    btnDelete.setTooltip(new Tooltip("Hapus User"));
                     btnDelete.setOnAction(e -> handleDeleteUser(user));
 
                     setGraphic(btnDelete);

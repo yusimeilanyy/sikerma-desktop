@@ -32,7 +32,7 @@ public class AddPemdaDocumentController {
     @FXML private DatePicker dpTanggalMulai;
     @FXML private DatePicker dpTanggalBerakhir;
     @FXML private TextArea txtCatatan;
-
+    @FXML private Label lblFileName;
     @FXML private Label lblProvinsi;
     @FXML private VBox boxProvinsi;
     @FXML private ComboBox<String> cbProvinsi;
@@ -137,7 +137,6 @@ public class AddPemdaDocumentController {
         if (doc.getPicBlsdm() != null) cbPICBlsdm.setValue(doc.getPicBlsdm());
         if (doc.getNomorDokumen() != null) txtNomorDokumenBalai.setText(doc.getNomorDokumen());
 
-        // ✅ TAMBAHAN BARU: Isi field Nomor Dokumen Pemda dan Pemilik
         if (doc.getNomorDokumenPemda() != null) txtNomorDokumenPemda.setText(doc.getNomorDokumenPemda());
         if (doc.getPemilik() != null) txtPemilik.setText(doc.getPemilik());
 
@@ -272,7 +271,8 @@ public class AddPemdaDocumentController {
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
             selectedFile = file;
-            showAlert("Info", "File dipilih: " + file.getName());
+            lblFileName.setText(file.getName());
+            lblFileName.setStyle("-fx-text-fill: #059669; -fx-font-weight: bold;");
         }
     }
 

@@ -13,7 +13,7 @@
         <HBox alignment="CENTER_LEFT" spacing="15">
             <Label text="Dokumen Kadaluarsa" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
         </HBox>
-        <Label text="Daftar dokumen yang telah melewati tanggal berakhir dan membutuhkan perpanjangan."
+        <Label text="Daftar dokumen yang telah melewati tanggal berakhir dan membutuhkan perpanjangan"
                style="-fx-font-size: 14px; -fx-text-fill: #64748b;" wrapText="true"/>
     </VBox>
 

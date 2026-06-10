@@ -67,7 +67,7 @@
 
                 <VBox spacing="8">
                     <Label text="Overview Kerja Sama" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
-                    <Label text="Pantau status, masa berlaku dan tindakan yang diperlukan untuk semua dokumen kerja sama."
+                    <Label text="Pantau status, masa berlaku dan tindakan yang diperlukan untuk semua dokumen kerja sama"
                            style="-fx-font-size: 14px; -fx-text-fill: #64748b;" wrapText="true"/>
                 </VBox>
 
@@ -169,7 +169,7 @@
                                    style="-fx-background-color: #f8fafc; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-padding: 10 15 10 40; -fx-pref-width: 280;"/>
                         <ComboBox fx:id="cbJenis" prefWidth="150" style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0;"/>
                         <ComboBox fx:id="cbStatus" prefWidth="150" style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0;"/>
-                        <Button text="Cari" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 10 18; -fx-cursor: hand;" onAction="#handleSearch"/>
+                        <Button text="Cari" style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 10 18; -fx-cursor: hand;" onAction="#handleSearch"/>
                     </HBox>
 
                     <TableView fx:id="tableDocuments" VBox.vgrow="ALWAYS"

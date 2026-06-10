@@ -17,7 +17,7 @@
                 <!-- Header -->
                 <HBox alignment="CENTER_LEFT" spacing="20">
                     <VBox spacing="3">
-                        <Label text="Manajemen Pengguna" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                        <Label text="Manajemen Pengguna" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                         <Label text="Kelola akun pengguna sistem SIKERMA"
                                style="-fx-font-size: 12px; -fx-text-fill: #64748b;" wrapText="true"/>
                     </VBox>

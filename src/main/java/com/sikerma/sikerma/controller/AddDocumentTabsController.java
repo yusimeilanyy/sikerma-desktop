@@ -43,7 +43,7 @@ public class AddDocumentTabsController {
     @FXML private TextField txtNomorDokumenPemda;
     @FXML private TextField txtPICPemda;
     @FXML private TextField txtKontakPICPemda;
-    @FXML private TextField txtPemilikPemda;  // ✅ TAMBAHAN BARU
+    @FXML private TextField txtPemilikPemda;
     @FXML private ComboBox<String> cbStatusPemda;
     @FXML private DatePicker dpTanggalMulaiPemda;
     @FXML private DatePicker dpTanggalBerakhirPemda;
@@ -62,7 +62,7 @@ public class AddDocumentTabsController {
     @FXML private TextField txtNomorDokumenMitra;
     @FXML private TextField txtPicMitra;
     @FXML private TextField txtKontakMitra;
-    @FXML private TextField txtPemilikNonPemda;  // ✅ TAMBAHAN BARU
+    @FXML private TextField txtPemilikNonPemda;
     @FXML private ComboBox<String> cbStatusNonPemda;
     @FXML private DatePicker dpTanggalMulaiNonPemda;
     @FXML private DatePicker dpTanggalBerakhirNonPemda;
@@ -370,12 +370,10 @@ public class AddDocumentTabsController {
                 filePath = uploadFile(selectedFilePemda);
             }
 
-            // ✅ TAMBAHAN BARU: Ambil nilai field baru
             String nomorDokumenPemda = txtNomorDokumenPemda.getText().trim();
             String pemilik = txtPemilikPemda.getText().trim();
 
             Connection conn = DatabaseConfig.connect();
-            // ✅ Query diperbarui: tambah nomor_dokumen_pemda dan pemilik
             String sql = "INSERT INTO documents (jenis, mitra, kategori, jenis_dokumen_detail, " +
                     "pic_blsdm, nomor_dokumen, nomor_dokumen_pemda, pemilik, tanggal_mulai, tanggal_berakhir, status, " +
                     "pic, kontak_pic, keterangan, file_path, created_at) " +
@@ -451,12 +449,10 @@ public class AddDocumentTabsController {
             String kontakPic = txtKontakMitra.getText().trim();
             String catatan = txtCatatanNonPemda.getText().trim();
 
-            // ✅ TAMBAHAN BARU: Ambil nilai field baru
             String nomorDokumenMitra = txtNomorDokumenMitra.getText().trim();
             String pemilik = txtPemilikNonPemda.getText().trim();
 
             Connection conn = DatabaseConfig.connect();
-            // ✅ Query diperbarui: tambah nomor_dokumen_mitra dan pemilik
             String sql = "INSERT INTO documents (nomor_dokumen, nomor_dokumen_mitra, pemilik, jenis, mitra, kategori, jenis_dokumen_detail, " +
                     "tanggal_mulai, tanggal_berakhir, pic, kontak_pic, pic_blsdm, file_path, status, keterangan, created_by) " +
                     "VALUES (?, ?, ?, ?, ?, 'Non-Pemerintah', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";

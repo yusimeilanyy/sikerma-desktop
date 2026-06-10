@@ -16,7 +16,7 @@
 
                 <!-- Header -->
                 <VBox spacing="8">
-                    <Label text="Manajemen Dokumen" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                    <Label text="Manajemen Dokumen" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                     <Label text="Kelola seluruh dokumen kerja sama, pantau masa berlaku, dan lakukan tindakan perpanjangan atau pembaharuan"
                            style="-fx-font-size: 14px; -fx-text-fill: #64748b;" wrapText="true"/>
                 </VBox>

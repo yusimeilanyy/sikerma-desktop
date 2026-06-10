@@ -16,7 +16,7 @@
                     onAction="#handleKembali"/>
             <Label text="Perpanjang Dokumen" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
         </HBox>
-        <Label text="Perpanjang masa berlaku dokumen yang telah kadaluarsa."
+        <Label text="Perpanjang masa berlaku dokumen yang telah kadaluarsa"
                style="-fx-font-size: 14px; -fx-text-fill: #64748b;" wrapText="true"/>
     </VBox>
 
@@ -74,7 +74,7 @@
                                     style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-padding: 10; -fx-pref-width: 300;"/>
                     </VBox>
 
-                    <Label text="⚠Status dokumen akan diperbarui otomatis menjadi 'Baru' dan Aktif setelah proses perpanjangan berhasil diselesaikan."
+                    <Label text="⚠Status dokumen akan diperbarui otomatis menjadi 'Baru' dan Aktif setelah proses perpanjangan berhasil diselesaikan"
                            wrapText="true"
                            style="-fx-background-color: #fef3c7; -fx-border-color: #fde68a; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12; -fx-text-fill: #92400e; -fx-font-size: 12px;"/>
 

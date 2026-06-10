@@ -77,7 +77,6 @@ public class AddNonPemdaDocumentController {
         if (doc.getPicBlsdm() != null) cbPicBlsdm.setValue(doc.getPicBlsdm());
         if (doc.getNomorDokumen() != null) txtNomorDokumenBalai.setText(doc.getNomorDokumen());
 
-        // ✅ TAMBAHAN BARU: Isi field Nomor Dokumen Mitra dan Pemilik
         if (doc.getNomorDokumenMitra() != null) txtNomorDokumenMitra.setText(doc.getNomorDokumenMitra());
         if (doc.getPemilik() != null) txtPemilik.setText(doc.getPemilik());
 
@@ -200,7 +199,6 @@ public class AddNonPemdaDocumentController {
             String kontakPic = txtKontakMitra.getText().trim();
             String catatan = txtCatatan.getText().trim();
 
-            // ✅ TAMBAHAN BARU: Ambil nilai field baru
             String nomorDokumenBalai = txtNomorDokumenBalai.getText().trim();
             String nomorDokumenMitra = txtNomorDokumenMitra.getText().trim();
             String pemilik = txtPemilik.getText().trim();

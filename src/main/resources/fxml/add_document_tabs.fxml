@@ -9,14 +9,13 @@
             fx:controller="com.sikerma.sikerma.controller.AddDocumentTabsController"
             style="-fx-background-color: #f8fafc;">
 
-    <!-- MAIN CONTENT -->
     <center>
         <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-width: 0;">
             <VBox spacing="20" style="-fx-padding: 30 40 40 40; -fx-background-color: #f8fafc;">
 
                 <!-- Header -->
                 <VBox spacing="8">
-                    <Label text="Tambah Dokumen" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                    <Label text="Tambah Dokumen" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                     <Label text="Lengkapi data dokumen kerja sama di bawah ini"
                            style="-fx-font-size: 14px; -fx-text-fill: #64748b;" wrapText="true"/>
                 </VBox>
@@ -24,9 +23,9 @@
                 <!-- Tab Selector -->
                 <HBox spacing="0" style="-fx-background-color: #f1f5f9; -fx-background-radius: 10; -fx-padding: 4;">
                     <Button fx:id="btnTabPemda" text="🏛 Pemerintah Daerah" onAction="#showPemdaTab"
-                            style="-fx-background-color: #0d9488; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 12 30; -fx-cursor: hand;"/>
+                            style="-fx-background-color: #0d9488; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 12 30; -fx-cursor: hand; -fx-font-size: 13px;"/>
                     <Button fx:id="btnTabNonPemda" text="🏢 Non-Pemerintah Daerah" onAction="#showNonPemdaTab"
-                            style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 12 30; -fx-cursor: hand;"/>
+                            style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 12 30; -fx-cursor: hand; -fx-font-size: 13px;"/>
                 </HBox>
 
                 <!-- PEMDA FORM -->

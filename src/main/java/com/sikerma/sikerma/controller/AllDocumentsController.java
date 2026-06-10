@@ -496,7 +496,6 @@ public class AllDocumentsController {
                 doc.setKeterangan(rs.getString("keterangan"));
                 doc.setFilePath(rs.getString("file_path"));
 
-                // ✅ TAMBAHAN BARU: Load 3 field baru dari database
                 doc.setNomorDokumenPemda(rs.getString("nomor_dokumen_pemda"));
                 doc.setNomorDokumenMitra(rs.getString("nomor_dokumen_mitra"));
                 doc.setPemilik(rs.getString("pemilik"));
