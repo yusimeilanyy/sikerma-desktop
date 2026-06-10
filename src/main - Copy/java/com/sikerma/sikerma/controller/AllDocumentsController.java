@@ -55,16 +55,17 @@ public class AllDocumentsController {
     private ObservableList<Document> filteredList = FXCollections.observableArrayList();
     private int currentUserId;
     private String currentFilter = "Pemerintah Daerah";
-    private String currentUserRole;
+    private String currentUserRole; // TAMBAHAN: Field untuk menyimpan role
     private DashboardController dashboardController;
 
     public void setDashboardController(DashboardController controller) {
         this.dashboardController = controller;
     }
 
+    // MODIFIKASI: Tambah parameter role
     public void setUserData(int userId, String userName, String role) {
         this.currentUserId = userId;
-        this.currentUserRole = role;
+        this.currentUserRole = role; // TAMBAHAN: Simpan role
         initializeTable();
         initializeFilters();
         loadDocuments();
@@ -388,7 +389,7 @@ public class AllDocumentsController {
         colDokumenFinal.setMaxWidth(80);
         colDokumenFinal.setMinWidth(80);
 
-        // MODIFIKASI: Kolom Aksi - hanya tampil untuk Admin
+        // MODIFIKASI: Kolom Aksi dengan role checking
         colAksi.setCellFactory(param -> new TableCell<>() {
             @Override
             protected void updateItem(Void item, boolean empty) {
@@ -405,7 +406,7 @@ public class AllDocumentsController {
                     HBox hbox = new HBox(8);
                     hbox.setAlignment(Pos.CENTER);
 
-                    // Cek apakah user adalah Admin
+                    // TAMBAHAN: Cek apakah user adalah Admin
                     boolean isAdmin = currentUserRole != null &&
                             (currentUserRole.equalsIgnoreCase("admin") ||
                                     currentUserRole.equalsIgnoreCase("administrator"));
@@ -427,8 +428,13 @@ public class AllDocumentsController {
                         btnDelete.setOnAction(e -> handleDelete(doc));
 
                         hbox.getChildren().addAll(btnEdit, btnDelete);
+                    } else {
+                        // Staff/PIC hanya bisa lihat (tidak ada tombol)
+                        Label lblInfo = new Label("👁️");
+                        lblInfo.setStyle("-fx-font-size: 14px; -fx-text-fill: #64748b;");
+                        lblInfo.setTooltip(new Tooltip("View Only - Staff/PIC"));
+                        hbox.getChildren().add(lblInfo);
                     }
-                    // Staff tidak menampilkan tombol apa-apa (kolom kosong)
 
                     setGraphic(hbox);
                     setAlignment(Pos.CENTER);
@@ -438,15 +444,6 @@ public class AllDocumentsController {
         colAksi.setPrefWidth(120);
         colAksi.setMaxWidth(120);
         colAksi.setMinWidth(120);
-
-        // MODIFIKASI: Sembunyikan kolom Aksi untuk Staff/User
-        boolean isAdmin = currentUserRole != null &&
-                (currentUserRole.equalsIgnoreCase("admin") ||
-                        currentUserRole.equalsIgnoreCase("administrator"));
-
-        if (!isAdmin) {
-            colAksi.setVisible(false);
-        }
 
         tableDocuments.setRowFactory(tv -> new TableRow<>() {
             @Override

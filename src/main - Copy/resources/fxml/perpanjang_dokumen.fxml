@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.sikerma.sikerma.controller.PerpanjangDokumenController"
+      style="-fx-background-color: #f8fafc;">
+
+    <!-- Header (fixed, tidak ikut scroll) -->
+    <VBox spacing="8" style="-fx-padding: 30 40 20 40;">
+        <HBox alignment="CENTER_LEFT" spacing="15">
+            <Button fx:id="btnKembali" text="← Kembali"
+                    style="-fx-background-color: #e2e8f0; -fx-text-fill: #475569; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand; -fx-font-weight: bold;"
+                    onAction="#handleKembali"/>
+            <Label text="Perpanjang Dokumen" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+        </HBox>
+        <Label text="Perpanjang masa berlaku dokumen yang telah kadaluarsa."
+               style="-fx-font-size: 14px; -fx-text-fill: #64748b;" wrapText="true"/>
+    </VBox>
+
+    <!-- Scrollable Content -->
+    <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-border-width: 0;"
+                hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+
+        <VBox spacing="20" style="-fx-padding: 0 40 40 40;">
+
+            <!-- Form Card -->
+            <VBox spacing="20" style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 30;">
+
+                <Label text="Form Perpanjangan" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                <Separator/>
+
+                <!-- Document Info -->
+                <VBox spacing="12">
+                    <Label text="Informasi Dokumen" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                    <GridPane vgap="12" hgap="10">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="NEVER" prefWidth="180"/>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                        </columnConstraints>
+
+                        <Label text="Jenis Dokumen" style="-fx-text-fill: #64748b; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <Label fx:id="lblJenis" text="-" style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                        <Label text="Nomor Dokumen" style="-fx-text-fill: #64748b; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <Label fx:id="lblNomor" text="-" style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                        <Label text="Mitra" style="-fx-text-fill: #64748b; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                        <Label fx:id="lblMitra" text="-" style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 13px;" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                        <Label text="Tanggal Mulai" style="-fx-text-fill: #64748b; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                        <Label fx:id="lblTanggalMulai" text="-" style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                        <Label text="Tanggal Berakhir" style="-fx-text-fill: #64748b; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                        <Label fx:id="lblTanggalBerakhir" text="-" style="-fx-text-fill: #dc2626; -fx-font-weight: bold; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+                        <Label text="Status" style="-fx-text-fill: #64748b; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+                        <Label fx:id="lblStatus" text="Kadaluarsa" style="-fx-text-fill: #dc2626; -fx-font-weight: bold; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                    </GridPane>
+                </VBox>
+
+                <Separator/>
+
+                <!-- Extension Form -->
+                <VBox spacing="15">
+                    <Label text="Detail Perpanjangan" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+
+                    <VBox spacing="6">
+                        <Label text="Tanggal Berakhir Baru *" style="-fx-text-fill: #475569; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+                        <DatePicker fx:id="dpTanggalBaru" promptText="Pilih tanggal baru..."
+                                    style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-padding: 10; -fx-pref-width: 300;"/>
+                    </VBox>
+
+                    <Label text="⚠Status dokumen akan diperbarui otomatis menjadi 'Baru' dan Aktif setelah proses perpanjangan berhasil diselesaikan."
+                           wrapText="true"
+                           style="-fx-background-color: #fef3c7; -fx-border-color: #fde68a; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12; -fx-text-fill: #92400e; -fx-font-size: 12px;"/>
+
+                    <VBox spacing="6">
+                        <Label text="Catatan Perpanjangan (Opsional)" style="-fx-text-fill: #475569; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+                        <TextArea fx:id="txtCatatan" prefRowCount="4" promptText="Contoh: Perpanjangan sesuai hasil evaluasi tahun 2026"
+                                  style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-padding: 10;"/>
+                    </VBox>
+
+                    <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+                        <Button fx:id="btnBatal" text="Batal"
+                                style="-fx-background-color: #f1f5f9; -fx-text-fill: #64748b; -fx-background-radius: 10; -fx-padding: 12 24; -fx-font-weight: bold; -fx-cursor: hand;"
+                                onAction="#handleBatal"/>
+                        <Button fx:id="btnSimpan" text="💾 Simpan Perpanjangan"
+                                style="-fx-background-color: #14b8a6; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 12 24; -fx-font-weight: bold; -fx-cursor: hand;"
+                                onAction="#handleSimpan"/>
+                    </HBox>
+                </VBox>
+            </VBox>
+        </VBox>
+    </ScrollPane>
+</VBox>

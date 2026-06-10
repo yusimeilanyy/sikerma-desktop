@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.time.LocalDate;
 
 public class AddDocumentTabsController {
@@ -140,7 +139,11 @@ public class AddDocumentTabsController {
                 "Lainnya..."
         );
 
-        cbPICBlsdmPemda.getItems().add("Pilih PIC");
+        cbPICBlsdmPemda.getItems().addAll(
+                "Pilih PIC",
+                "Dra. Maria Wowor, M.Pd",
+                "Drs. Sarah Tumangkeng, M.Si"
+        );
         cbPICBlsdmPemda.setValue("Pilih PIC");
 
         cbStatusPemda.getItems().addAll(
@@ -150,6 +153,7 @@ public class AddDocumentTabsController {
         );
         cbStatusPemda.setValue("Baru");
 
+        // Non-PEMDA ComboBoxes
         cbJenisPerjanjianNonPemda.getItems().addAll(
                 "MoU (Memorandum of Understanding)",
                 "PKS (Perjanjian Kerja Sama)"
@@ -166,8 +170,12 @@ public class AddDocumentTabsController {
         );
         cbJenisDokumenNonPemda.setValue("Pilih jenis dokumen");
 
-        // Hnama user akan di load dari database
-        cbPicBlsdmNonPemda.getItems().add("Pilih PIC BLSDM Komdigi Manado");
+        cbPicBlsdmNonPemda.getItems().addAll(
+                "Dr. Ahmad Santoso, M.Si",
+                "Dra. Maria Wowor, M.Pd",
+                "Ir. John Lengkong, M.T",
+                "Drs. Sarah Tumangkeng, M.Si"
+        );
         cbPicBlsdmNonPemda.setValue("Pilih PIC BLSDM Komdigi Manado");
 
         cbStatusNonPemda.getItems().addAll(
@@ -176,40 +184,6 @@ public class AddDocumentTabsController {
                 "Persiapan TTD Para Pihak", "Selesai"
         );
         cbStatusNonPemda.setValue("Baru");
-
-        // Load PIC BLSDM dari database users (full_name)
-        loadPICBLSDMFromUsers();
-    }
-
-    /**
-     * Memuat nama lengkap user/staff dari tabel users untuk dropdown PIC BLSDM.
-     * Mengambil data dari kolom full_name di tabel users yang is_active = 1.
-     * Digunakan untuk dropdown PIC BLSDM di form Pemda dan Non-Pemda.
-     */
-    private void loadPICBLSDMFromUsers() {
-        String sql = "SELECT full_name FROM users WHERE is_active = 1 ORDER BY full_name ASC";
-
-        try (Connection conn = DatabaseConfig.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-
-            while (rs.next()) {
-                String fullName = rs.getString("full_name");
-                if (fullName != null && !fullName.isEmpty()) {
-                    // Tambahkan ke dropdown PEMDA (hindari duplikat)
-                    if (!cbPICBlsdmPemda.getItems().contains(fullName)) {
-                        cbPICBlsdmPemda.getItems().add(fullName);
-                    }
-                    // Tambahkan ke dropdown Non-PEMDA (hindari duplikat)
-                    if (!cbPicBlsdmNonPemda.getItems().contains(fullName)) {
-                        cbPicBlsdmNonPemda.getItems().add(fullName);
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void setupEventHandlers() {

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.sikerma.sikerma.controller.DashboardController"
+            style="-fx-background-color: #f8fafc;">
+
+    <!-- SIDEBAR -->
+    <left>
+        <VBox style="-fx-background-color: white; -fx-min-width: 260px; -fx-max-width: 260px;" spacing="0">
+            <!-- Logo Section -->
+            <VBox spacing="10" style="-fx-padding: 25 20 30 20;">
+                <ImageView fitHeight="200" fitWidth="200" preserveRatio="true">
+                    <image>
+                        <Image url="@../images/SIKERMA.png"/>
+                    </image>
+                </ImageView>
+            </VBox>
+
+            <Separator style="-fx-background-color: #e2e8f0;"/>
+
+            <VBox spacing="4" style="-fx-padding: 15 12;" VBox.vgrow="ALWAYS">
+                <Button fx:id="btnDashboard" text="Dashboard"
+                        style="-fx-background-color: #eff6ff; -fx-text-fill: #2563eb; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12 16; -fx-cursor: hand; -fx-alignment: CENTER_LEFT;"
+                        maxWidth="Infinity" onAction="#handleDashboard"/>
+                <Button fx:id="btnTambah" text="Tambah Dokumen"
+                        style="-fx-background-color: transparent; -fx-text-fill: #475569; -fx-padding: 12 16; -fx-cursor: hand; -fx-alignment: CENTER_LEFT;"
+                        maxWidth="Infinity" onAction="#handleAddDocument"/>
+                <Button fx:id="btnSemuaDokumen" text="Semua Dokumen"
+                        style="-fx-background-color: transparent; -fx-text-fill: #475569; -fx-padding: 12 16; -fx-cursor: hand; -fx-alignment: CENTER_LEFT;"
+                        maxWidth="Infinity" onAction="#handleViewDocuments"/>
+                <Button fx:id="btnTindakLanjut" text="Tindak Lanjut"
+                        style="-fx-background-color: transparent; -fx-text-fill: #475569; -fx-padding: 12 16; -fx-cursor: hand; -fx-alignment: CENTER_LEFT;"
+                        maxWidth="Infinity" onAction="#handleTindakLanjut"/>
+                <Button fx:id="btnUser" text="User"
+                        style="-fx-background-color: transparent; -fx-text-fill: #475569; -fx-padding: 12 16; -fx-cursor: hand; -fx-alignment: CENTER_LEFT;"
+                        maxWidth="Infinity" onAction="#handleUsers"/>
+            </VBox>
+            <VBox spacing="15" style="-fx-padding: 15 12 25 12;">
+                <Separator style="-fx-background-color: #e2e8f0;"/>
+                <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-padding: 12;">
+                    <StackPane style="-fx-background-color: #e0e7ff; -fx-background-radius: 20; -fx-pref-width: 40; -fx-pref-height: 40;">
+                        <Text fill="#3b82f6" text="U" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                    </StackPane>
+                    <VBox spacing="2">
+                        <Label fx:id="lblUserName" text="Administrator Sistem" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                        <Label fx:id="lblUserRole" text="ADMIN" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                    </VBox>
+                </HBox>
+                <Button fx:id="btnLogout" text="Logout"
+                        style="-fx-background-color: #fef2f2; -fx-text-fill: #ef4444; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12 16; -fx-cursor: hand; -fx-alignment: CENTER_LEFT;"
+                        maxWidth="Infinity" onAction="#handleLogout"/>
+            </VBox>
+        </VBox>
+    </left>
+
+    <!-- MAIN CONTENT -->
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-width: 0;">
+            <VBox spacing="25" style="-fx-padding: 30 40 40 40; -fx-background-color: #f8fafc;">
+
+                <VBox spacing="8">
+                    <Label text="Overview Kerja Sama" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                    <Label text="Pantau status, masa berlaku dan tindakan yang diperlukan untuk semua dokumen kerja sama."
+                           style="-fx-font-size: 14px; -fx-text-fill: #64748b;" wrapText="true"/>
+                </VBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #fef2f2; -fx-border-color: #fecaca; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 18 24;">
+                    <StackPane style="-fx-background-color: #fee2e2; -fx-background-radius: 10; -fx-pref-width: 45; -fx-pref-height: 45;">
+                        <Text fill="#ef4444" text="!" style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
+                    </StackPane>
+                    <VBox spacing="4">
+                        <Label text="Dokumen Perlu Perhatian" style="-fx-font-weight: bold; -fx-text-fill: #991b1b;"/>
+                        <Label text="Klik untuk selengkapnya" style="-fx-font-size: 12px; -fx-text-fill: #b91c1c;"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <VBox spacing="2" alignment="CENTER_RIGHT">
+                        <Label text="MENDESAK" style="-fx-font-size: 10px; -fx-text-fill: #ef4444; -fx-font-weight: bold;"/>
+                        <Label fx:id="lblMendesak" text="1" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ef4444;"/>
+                    </VBox>
+                    <VBox spacing="2" alignment="CENTER_RIGHT" style="-fx-padding: 0 20 0 20;">
+                        <Label text="PERINGATAN" style="-fx-font-size: 10px; -fx-text-fill: #f97316; -fx-font-weight: bold;"/>
+                        <Label fx:id="lblPeringatan" text="0" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #f97316;"/>
+                    </VBox>
+                    <VBox spacing="2" alignment="CENTER_RIGHT">
+                        <Label text="TOTAL" style="-fx-font-size: 10px; -fx-text-fill: #1e293b; -fx-font-weight: bold;"/>
+                        <Label fx:id="lblTotalAlert" text="1" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                    </VBox>
+                </HBox>
+
+                <HBox spacing="20">
+                    <VBox fx:id="cardMou" onMouseClicked="#handleCardMouClick" style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24; -fx-min-width: 200; -fx-cursor: hand;" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="15">
+                            <StackPane style="-fx-background-color: #eff6ff; -fx-background-radius: 12; -fx-pref-width: 50; -fx-pref-height: 50;">
+                                <Text fill="#3b82f6" text="M" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+                            </StackPane>
+                            <VBox spacing="4">
+                                <Label text="Total MoU" style="-fx-font-size: 14px; -fx-text-fill: #64748b;"/>
+                                <Label fx:id="lblTotalMou" text="8" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                            </VBox>
+                        </HBox>
+                        <Label fx:id="lblMouActive" text="3 aktif" style="-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-padding: 12 0 0 65;"/>
+                    </VBox>
+
+                    <VBox fx:id="cardPks" onMouseClicked="#handleCardPksClick" style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24; -fx-min-width: 200; -fx-cursor: hand;" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="15">
+                            <StackPane style="-fx-background-color: #eff6ff; -fx-background-radius: 12; -fx-pref-width: 50; -fx-pref-height: 50;">
+                                <Text fill="#3b82f6" text="P" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+                            </StackPane>
+                            <VBox spacing="4">
+                                <Label text="Total PKS" style="-fx-font-size: 14px; -fx-text-fill: #64748b;"/>
+                                <Label fx:id="lblTotalPks" text="9" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                            </VBox>
+                        </HBox>
+                        <Label fx:id="lblPksActive" text="2 aktif" style="-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-padding: 12 0 0 65;"/>
+                    </VBox>
+
+                    <VBox fx:id="cardAktif" onMouseClicked="#handleCardAktifClick" style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24; -fx-min-width: 200; -fx-cursor: hand;" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="15">
+                            <StackPane style="-fx-background-color: #f0fdf4; -fx-background-radius: 12; -fx-pref-width: 50; -fx-pref-height: 50;">
+                                <Text fill="#22c55e" text="✓" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+                            </StackPane>
+                            <VBox spacing="4">
+                                <Label text="Dokumen Aktif" style="-fx-font-size: 14px; -fx-text-fill: #64748b;"/>
+                                <Label fx:id="lblActive" text="5" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                            </VBox>
+                        </HBox>
+                        <Label fx:id="lblActiveDetail" text="5 aktif dari 17 dokumen" style="-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-padding: 12 0 0 65;"/>
+                    </VBox>
+
+                    <VBox fx:id="cardKadaluarsa" onMouseClicked="#handleCardKadaluarsaClick" style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24; -fx-min-width: 200; -fx-cursor: hand;" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="15">
+                            <StackPane style="-fx-background-color: #fef2f2; -fx-background-radius: 12; -fx-pref-width: 50; -fx-pref-height: 50;">
+                                <Text fill="#ef4444" text="!" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+                            </StackPane>
+                            <VBox spacing="4">
+                                <Label text="Dokumen Kadaluarsa" style="-fx-font-size: 14px; -fx-text-fill: #64748b;"/>
+                                <Label fx:id="lblExpired" text="12" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                            </VBox>
+                        </HBox>
+                        <Label fx:id="lblExpiredDetail" text="12 kadaluarsa dari 17 dokumen" style="-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-padding: 12 0 0 65;"/>
+                    </VBox>
+                </HBox>
+
+                <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24;">
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Daftar Dokumen Terbaru" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="lblTotalDocs" text="Total : 17" style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-font-weight: bold;"/>
+                    </HBox>
+
+                    <HBox spacing="15" alignment="CENTER_LEFT">
+                        <TextField fx:id="txtSearch" promptText="Cari dokumen..."
+                                   style="-fx-background-color: #f8fafc; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-padding: 10 15 10 40; -fx-pref-width: 280;"/>
+                        <ComboBox fx:id="cbJenis" prefWidth="150" style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0;"/>
+                        <ComboBox fx:id="cbStatus" prefWidth="150" style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0;"/>
+                        <Button text="Cari" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 10 18; -fx-cursor: hand;" onAction="#handleSearch"/>
+                    </HBox>
+
+                    <TableView fx:id="tableDocuments" VBox.vgrow="ALWAYS"
+                               style="-fx-background-color: transparent; -fx-border-width: 0; -fx-hbar-policy: NEVER; -fx-vbar-policy: NEVER;">
+                        <columns>
+                            <TableColumn fx:id="colNo" text="No" prefWidth="50" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colJenis" text="Jenis" prefWidth="80" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colNomor" text="Nomor Dokumen" prefWidth="130" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colMitra" text="Mitra" prefWidth="180" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colTanggalMulai" text="Tanggal Mulai" prefWidth="134" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colTanggal" text="Tanggal Berakhir" prefWidth="134" resizable="false" reorderable="false"/>
+                            <TableColumn fx:id="colStatus" text="Status" prefWidth="150" resizable="false" reorderable="false"/>
+                        </columns>
+                    </TableView>
+
+                    <HBox alignment="CENTER" spacing="20">
+                        <Label fx:id="lblPageInfo" text="Menampilkan 1 - 5 dari 17 dokumen" style="-fx-font-size: 13px; -fx-text-fill: #64748b;"/>
+                        <HBox spacing="5" alignment="CENTER">
+                            <Button text="&lt;" style="-fx-background-color: #f1f5f9; -fx-text-fill: #94a3b8; -fx-background-radius: 8; -fx-padding: 8 12; -fx-cursor: hand;" onAction="#handlePrevPage"/>
+                            <Button fx:id="btnPage1" text="1" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 14; -fx-cursor: hand;" onAction="#handlePageClick"/>
+                            <Button fx:id="btnPage2" text="2" style="-fx-background-color: #f1f5f9; -fx-text-fill: #64748b; -fx-background-radius: 8; -fx-padding: 8 14; -fx-cursor: hand;" onAction="#handlePageClick"/>
+                            <Button fx:id="btnPage3" text="3" style="-fx-background-color: #f1f5f9; -fx-text-fill: #64748b; -fx-background-radius: 8; -fx-padding: 8 14; -fx-cursor: hand;" onAction="#handlePageClick"/>
+                            <Button fx:id="btnPage4" text="4" style="-fx-background-color: #f1f5f9; -fx-text-fill: #64748b; -fx-background-radius: 8; -fx-padding: 8 14; -fx-cursor: hand;" onAction="#handlePageClick"/>
+                            <Button text="&gt;" style="-fx-background-color: #f1f5f9; -fx-text-fill: #94a3b8; -fx-background-radius: 8; -fx-padding: 8 12; -fx-cursor: hand;" onAction="#handleNextPage"/>
+                        </HBox>
+                        <ComboBox fx:id="cbPerPage" value="5 / halaman" prefWidth="110" style="-fx-background-radius: 8; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- CHART SECTION -->
+                <VBox spacing="20" style="-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 24;">
+                    <Label text="Statistik &amp; Tren Dokumen" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+
+                    <HBox spacing="20">
+                        <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-border-width: 1; -fx-padding: 20;" HBox.hgrow="ALWAYS">
+                            <Label text="Perbandingan MoU &amp; PKS" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                            <Label text="Status aktif vs kadaluarsa" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+
+                            <StackPane VBox.vgrow="ALWAYS" style="-fx-padding: 20 0 0 0;">
+                                <BarChart fx:id="barChartMoUPks" alternativeRowFillVisible="false" horizontalGridLinesVisible="true" verticalGridLinesVisible="false" legendVisible="true">
+                                    <xAxis>
+                                        <CategoryAxis side="BOTTOM" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+                                    </xAxis>
+                                    <yAxis>
+                                        <NumberAxis side="LEFT" style="-fx-font-size: 12px; -fx-text-fill: #64748b;" tickUnit="1"/>
+                                    </yAxis>
+                                </BarChart>
+                            </StackPane>
+                        </VBox>
+
+                        <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-border-width: 1; -fx-padding: 20;" HBox.hgrow="ALWAYS">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Label text="Tren Dokumen Baru (Bulanan)" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label text="Tahun" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+                                <ComboBox fx:id="cbTahun" prefWidth="80" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0;"/>
+                            </HBox>
+                            <Label text="Berdasarkan tanggal mulai kerja sama" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+
+                            <StackPane VBox.vgrow="ALWAYS" style="-fx-padding: 20 0 0 0;">
+                                <LineChart fx:id="lineChartTren" alternativeColumnFillVisible="false" horizontalGridLinesVisible="true" verticalGridLinesVisible="false" legendVisible="true">
+                                    <xAxis>
+                                        <CategoryAxis side="BOTTOM" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+                                    </xAxis>
+                                    <yAxis>
+                                        <NumberAxis side="LEFT" style="-fx-font-size: 12px; -fx-text-fill: #64748b;" tickUnit="1"/>
+                                    </yAxis>
+                                </LineChart>
+                            </StackPane>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

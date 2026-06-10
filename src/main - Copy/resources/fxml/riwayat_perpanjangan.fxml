@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.sikerma.sikerma.controller.RiwayatPerpanjanganController"
+      spacing="20" style="-fx-padding: 30 40 40 40; -fx-background-color: #f8fafc;">
+
+    <!-- Header -->
+    <VBox spacing="8">
+        <HBox alignment="CENTER_LEFT" spacing="15">
+            <Button fx:id="btnKembali" text="← Kembali"
+                    style="-fx-background-color: #e2e8f0; -fx-text-fill: #475569; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand; -fx-font-weight: bold;"
+                    onAction="#handleKembali"/>
+            <Label text="Riwayat Perpanjangan" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+        </HBox>
+        <Label text="Riwayat perpanjangan dokumen."
+               style="-fx-font-size: 14px; -fx-text-fill: #64748b;" wrapText="true"/>
+    </VBox>
+
+    <!-- Document Info Card -->
+    <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 25;">
+        <GridPane hgap="40" vgap="15">
+            <columnConstraints>
+                <ColumnConstraints hgrow="NEVER" prefWidth="80"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+            </columnConstraints>
+
+            <!-- Badge Jenis -->
+            <Label fx:id="lblJenisBadge" text="MoU"
+                   style="-fx-background-color: #d1fae5; -fx-text-fill: #047857; -fx-padding: 8 16; -fx-background-radius: 8; -fx-font-weight: bold; -fx-font-size: 14px;"
+                   GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.rowSpan="2" GridPane.valignment="CENTER"/>
+
+            <!-- Nomor Dokumen -->
+            <Label fx:id="lblNomorDokumen" text="565" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #1e293b;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+            <Label text="Nomor Dokumen" style="-fx-font-size: 12px; -fx-text-fill: #64748b;" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+            <!-- Mitra -->
+            <Label fx:id="lblMitra" text="Pemerintah Provinsi Maluku Utara" style="-fx-font-size: 14px; -fx-text-fill: #1e293b;" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+            <Label text="Mitra" style="-fx-font-size: 12px; -fx-text-fill: #64748b;" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+
+            <!-- Tanggal Berakhir -->
+            <Label fx:id="lblTanggalBerakhir" text="7 Juni 2026 (2 hari lewat)" style="-fx-font-size: 14px; -fx-text-fill: #dc2626; -fx-font-weight: bold;" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+            <Label text="Tanggal Berakhir" style="-fx-font-size: 12px; -fx-text-fill: #64748b;" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+
+            <!-- Status -->
+            <Label fx:id="lblStatus" text="Kadaluarsa" style="-fx-font-size: 14px; -fx-text-fill: #dc2626; -fx-font-weight: bold;" GridPane.columnIndex="4" GridPane.rowIndex="0"/>
+            <Label text="Status" style="-fx-font-size: 12px; -fx-text-fill: #64748b;" GridPane.columnIndex="4" GridPane.rowIndex="1"/>
+        </GridPane>
+    </VBox>
+
+    <!-- History Table -->
+    <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 20;"
+          VBox.vgrow="ALWAYS">
+
+        <TableView fx:id="tableRiwayat" VBox.vgrow="ALWAYS"
+                   style="-fx-background-color: transparent; -fx-border-width: 0;">
+            <columns>
+                <TableColumn fx:id="colNo" text="No" prefWidth="80" resizable="false"/>
+                <TableColumn fx:id="colTanggalPerpanjangan" text="Tanggal Perpanjangan" prefWidth="200" resizable="false"/>
+                <TableColumn fx:id="colPeriodeBerlaku" text="Periode Berlaku" prefWidth="280" resizable="false"/>
+                <TableColumn fx:id="colCatatan" text="Catatan" prefWidth="400" resizable="false"/>
+            </columns>
+        </TableView>
+
+        <!-- Pagination -->
+        <HBox alignment="CENTER" spacing="15" style="-fx-padding: 15 0 0 0;">
+            <Label fx:id="lblPageInfo" style="-fx-font-size: 13px; -fx-text-fill: #64748b;" text="Belum ada riwayat perpanjangan"/>
+            <HBox spacing="5" alignment="CENTER">
+                <Button fx:id="btnPrevPage" text="&lt;" style="-fx-background-color: #f1f5f9; -fx-text-fill: #94a3b8; -fx-background-radius: 8; -fx-padding: 8 12; -fx-cursor: hand;" onAction="#handlePrevPage"/>
+                <Button fx:id="btnPage1" text="1" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 14; -fx-cursor: hand;" onAction="#handlePageClick"/>
+                <Button fx:id="btnNextPage" text="&gt;" style="-fx-background-color: #f1f5f9; -fx-text-fill: #94a3b8; -fx-background-radius: 8; -fx-padding: 8 12; -fx-cursor: hand;" onAction="#handleNextPage"/>
+            </HBox>
+        </HBox>
+    </VBox>
+</VBox>
