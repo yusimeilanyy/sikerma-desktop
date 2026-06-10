@@ -18,8 +18,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -29,6 +31,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -77,13 +80,17 @@ public class DashboardController {
     @FXML private Button btnPage4;
     @FXML private Button btnLogout;
 
-    @FXML private BarChart<String, Number> barChartMoUPks;
-    @FXML private LineChart<String, Number> lineChartTren;
+    @FXML private StackedBarChart<String, Number> barChartMoUPks;
+    @FXML private AreaChart<String, Number> areaChartTren;
 
     @FXML private VBox cardMou;
     @FXML private VBox cardPks;
     @FXML private VBox cardAktif;
     @FXML private VBox cardKadaluarsa;
+
+    @FXML private HBox alertBanner;
+    @FXML private VBox alertDetailContainer;
+    @FXML private Label lblAlertToggle;
 
     private ObservableList<Document> documentList = FXCollections.observableArrayList();
     private ObservableList<Document> allDocumentsForChart = FXCollections.observableArrayList();
@@ -95,6 +102,7 @@ public class DashboardController {
     private BorderPane mainLayout;
     private String activeCardFilter = null;
     private Document selectedDocumentForRenewal;
+    private boolean alertExpanded = false;
 
     public void setUserData(int userId, String userName, String role) {
         this.currentUserId = userId;
@@ -402,11 +410,13 @@ public class DashboardController {
                     active++;
                 }
 
-                String status = doc.getStatus();
-                if (status != null) {
-                    if (status.equals("Perlu Perhatian") || status.equals("Kadaluarsa")) {
+                // Mendesak: tanggal_berakhir dalam 7 hari atau kurang (dan belum lewat)
+                // Peringatan: tanggal_berakhir dalam 8-14 hari
+                if (doc.getTanggalBerakhir() != null) {
+                    long daysRemaining = ChronoUnit.DAYS.between(today, doc.getTanggalBerakhir());
+                    if (daysRemaining >= 0 && daysRemaining <= 7) {
                         mendesak++;
-                    } else if (status.contains("Review")) {
+                    } else if (daysRemaining > 7 && daysRemaining <= 14) {
                         peringatan++;
                     }
                 }
@@ -424,6 +434,11 @@ public class DashboardController {
             lblMendesak.setText(String.valueOf(mendesak));
             lblPeringatan.setText(String.valueOf(peringatan));
             lblTotalAlert.setText(String.valueOf(mendesak + peringatan));
+
+            // Update alert detail content if expanded
+            if (alertExpanded) {
+                buildAlertDetailContent();
+            }
 
             lblTotalDocs.setText("Total : " + totalItems);
             int start = offset + 1;
@@ -443,7 +458,7 @@ public class DashboardController {
 
     private void initializeCharts() {
         if (barChartMoUPks != null) barChartMoUPks.getData().clear();
-        if (lineChartTren != null) lineChartTren.getData().clear();
+        if (areaChartTren != null) areaChartTren.getData().clear();
 
         cbTahun.getItems().clear();
         int currentYear = LocalDate.now().getYear();
@@ -457,15 +472,13 @@ public class DashboardController {
         });
 
         setupBarChart();
-        setupLineChart();
+        setupAreaChart();
     }
 
     private void setupBarChart() {
         barChartMoUPks.setAnimated(false);
         barChartMoUPks.setStyle("-fx-background-color: transparent;");
         barChartMoUPks.setLegendSide(javafx.geometry.Side.BOTTOM);
-        barChartMoUPks.setBarGap(2);
-        barChartMoUPks.setCategoryGap(20);
 
         Node legend = barChartMoUPks.lookup(".chart-legend");
         if (legend != null) {
@@ -482,24 +495,25 @@ public class DashboardController {
         yAxis.setTickUnit(1);
     }
 
-    private void setupLineChart() {
-        lineChartTren.setAnimated(false);
-        lineChartTren.setStyle("-fx-background-color: transparent;");
+    private void setupAreaChart() {
+        areaChartTren.setAnimated(false);
+        areaChartTren.setStyle("-fx-background-color: transparent;");
+        areaChartTren.setCreateSymbols(true);
 
-        CategoryAxis xAxis = (CategoryAxis) lineChartTren.getXAxis();
+        CategoryAxis xAxis = (CategoryAxis) areaChartTren.getXAxis();
         xAxis.getCategories().clear();
         xAxis.getCategories().addAll("Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
                 "Jul", "Agu", "Sep", "Okt", "Nov", "Des");
         xAxis.setStyle("-fx-font-size: 11px;");
         xAxis.setTickLabelFill(javafx.scene.paint.Color.web("#64748b"));
 
-        NumberAxis yAxis = (NumberAxis) lineChartTren.getYAxis();
+        NumberAxis yAxis = (NumberAxis) areaChartTren.getYAxis();
         yAxis.setStyle("-fx-font-size: 11px;");
         yAxis.setTickLabelFill(javafx.scene.paint.Color.web("#64748b"));
         yAxis.setTickUnit(1);
 
-        lineChartTren.setLegendSide(javafx.geometry.Side.BOTTOM);
-        Node legend = lineChartTren.lookup(".chart-legend");
+        areaChartTren.setLegendSide(javafx.geometry.Side.BOTTOM);
+        Node legend = areaChartTren.lookup(".chart-legend");
         if (legend != null) {
             legend.setStyle("-fx-background-color: transparent; -fx-padding: 10 0 0 0; -fx-font-size: 11px;");
         }
@@ -533,7 +547,7 @@ public class DashboardController {
 
     private void updateCharts() {
         updateBarChart();
-        updateLineChart();
+        updateAreaChart();
     }
 
     private void updateBarChart() {
@@ -610,7 +624,7 @@ public class DashboardController {
         }
     }
 
-    private void updateLineChart() {
+    private void updateAreaChart() {
         String selectedYear = cbTahun.getValue();
         if (selectedYear == null) selectedYear = String.valueOf(LocalDate.now().getYear());
 
@@ -643,62 +657,71 @@ public class DashboardController {
             seriesPKS.getData().add(new XYChart.Data<>(getMonthName(i), pksPerMonth[i]));
         }
 
-        lineChartTren.getData().clear();
-        lineChartTren.getData().addAll(seriesMoU, seriesPKS);
+        areaChartTren.getData().clear();
+        areaChartTren.getData().addAll(seriesMoU, seriesPKS);
 
-        applyLineChartColors();
+        applyAreaChartColors();
     }
 
-    private void applyLineChartColors() {
+    private void applyAreaChartColors() {
         final String TEAL_COLOR = "#07b8af";
-        final String TEAL_FILL = "rgba(7, 184, 175, 0.15)";
+        final String TEAL_FILL = "rgba(7, 184, 175, 0.2)";
         final String TEAL_SHADOW = "rgba(7, 184, 175, 0.4)";
         final String ORANGE_COLOR = "#FF6B35";
-        final String ORANGE_FILL = "rgba(255, 107, 53, 0.15)";
+        final String ORANGE_FILL = "rgba(255, 107, 53, 0.2)";
         final String ORANGE_SHADOW = "rgba(255, 107, 53, 0.4)";
 
-        if (lineChartTren.getData().size() > 0) {
-            Node lineNodeMoU = lineChartTren.getData().get(0).getNode();
-            if (lineNodeMoU != null) {
-                lineNodeMoU.setStyle(
-                        "-fx-stroke: " + TEAL_COLOR + "; " +
-                                "-fx-stroke-width: 3px; " +
-                                "-fx-fill: " + TEAL_FILL + ";"
+        // Style MoU Baru series (teal area)
+        if (areaChartTren.getData().size() > 0) {
+            XYChart.Series<String, Number> seriesMoU = areaChartTren.getData().get(0);
+            Node seriesNode = seriesMoU.getNode();
+            if (seriesNode != null) {
+                // The series node in AreaChart is a Group containing the fill Path and stroke Path
+                seriesNode.lookup(".chart-series-area-line").setStyle(
+                        "-fx-stroke: " + TEAL_COLOR + "; -fx-stroke-width: 2.5px;"
+                );
+                seriesNode.lookup(".chart-series-area-fill").setStyle(
+                        "-fx-fill: " + TEAL_FILL + ";"
                 );
             }
 
-            for (XYChart.Data<String, Number> data : lineChartTren.getData().get(0).getData()) {
+            // Style data point symbols
+            for (XYChart.Data<String, Number> data : seriesMoU.getData()) {
                 Node node = data.getNode();
                 if (node != null) {
                     node.setStyle(
                             "-fx-background-color: " + TEAL_COLOR + ", white; " +
                                     "-fx-background-insets: 0, 2; " +
                                     "-fx-background-radius: 5px; " +
-                                    "-fx-padding: 5px; " +
+                                    "-fx-padding: 4px; " +
                                     "-fx-effect: dropshadow(gaussian, " + TEAL_SHADOW + ", 4, 0, 0, 1);"
                     );
                 }
             }
         }
 
-        if (lineChartTren.getData().size() > 1) {
-            Node lineNodePKS = lineChartTren.getData().get(1).getNode();
-            if (lineNodePKS != null) {
-                lineNodePKS.setStyle(
-                        "-fx-stroke: " + ORANGE_COLOR + "; " +
-                                "-fx-stroke-width: 3px; " +
-                                "-fx-fill: " + ORANGE_FILL + ";"
+        // Style PKS Baru series (orange area)
+        if (areaChartTren.getData().size() > 1) {
+            XYChart.Series<String, Number> seriesPKS = areaChartTren.getData().get(1);
+            Node seriesNode = seriesPKS.getNode();
+            if (seriesNode != null) {
+                seriesNode.lookup(".chart-series-area-line").setStyle(
+                        "-fx-stroke: " + ORANGE_COLOR + "; -fx-stroke-width: 2.5px;"
+                );
+                seriesNode.lookup(".chart-series-area-fill").setStyle(
+                        "-fx-fill: " + ORANGE_FILL + ";"
                 );
             }
 
-            for (XYChart.Data<String, Number> data : lineChartTren.getData().get(1).getData()) {
+            // Style data point symbols
+            for (XYChart.Data<String, Number> data : seriesPKS.getData()) {
                 Node node = data.getNode();
                 if (node != null) {
                     node.setStyle(
                             "-fx-background-color: " + ORANGE_COLOR + ", white; " +
                                     "-fx-background-insets: 0, 2; " +
                                     "-fx-background-radius: 5px; " +
-                                    "-fx-padding: 5px; " +
+                                    "-fx-padding: 4px; " +
                                     "-fx-effect: dropshadow(gaussian, " + ORANGE_SHADOW + ", 4, 0, 0, 1);"
                     );
                 }
@@ -925,6 +948,131 @@ public class DashboardController {
     @FXML private void handleLogout() {
         Stage stage = (Stage) lblUserName.getScene().getWindow();
         stage.close();
+    }
+
+    @FXML
+    private void handleToggleAlert() {
+        alertExpanded = !alertExpanded;
+        alertDetailContainer.setVisible(alertExpanded);
+        alertDetailContainer.setManaged(alertExpanded);
+
+        if (alertExpanded) {
+            lblAlertToggle.setText("Klik untuk sembunyikan");
+            alertBanner.setStyle("-fx-background-color: #fef2f2; -fx-border-color: #fecaca; -fx-border-width: 1 1 0 1; -fx-border-radius: 12 12 0 0; -fx-background-radius: 12 12 0 0; -fx-padding: 18 24; -fx-cursor: hand;");
+            buildAlertDetailContent();
+        } else {
+            lblAlertToggle.setText("Klik untuk selengkapnya");
+            alertBanner.setStyle("-fx-background-color: #fef2f2; -fx-border-color: #fecaca; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 18 24; -fx-cursor: hand;");
+            alertDetailContainer.getChildren().clear();
+        }
+    }
+
+    private void buildAlertDetailContent() {
+        alertDetailContainer.getChildren().clear();
+
+        LocalDate today = LocalDate.now();
+        List<Document> mendesakDocs = new ArrayList<>();
+        List<Document> peringatanDocs = new ArrayList<>();
+
+        for (Document doc : allDocumentsForChart) {
+            if (doc.getTanggalBerakhir() != null) {
+                long daysRemaining = ChronoUnit.DAYS.between(today, doc.getTanggalBerakhir());
+                if (daysRemaining >= 0 && daysRemaining <= 7) {
+                    mendesakDocs.add(doc);
+                } else if (daysRemaining > 7 && daysRemaining <= 14) {
+                    peringatanDocs.add(doc);
+                }
+            }
+        }
+
+        // Section: SANGAT MENDESAK
+        if (!mendesakDocs.isEmpty()) {
+            Label sectionTitle = new Label("⚠ SANGAT MENDESAK (≤7 hari)");
+            sectionTitle.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #dc2626;");
+            alertDetailContainer.getChildren().add(sectionTitle);
+
+            for (Document doc : mendesakDocs) {
+                alertDetailContainer.getChildren().add(createAlertDocCard(doc, true));
+            }
+        }
+
+        // Section: PERINGATAN
+        if (!peringatanDocs.isEmpty()) {
+            Label sectionTitle2 = new Label("⏰ PERINGATAN (≤14 hari)");
+            sectionTitle2.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #f97316; -fx-padding: 10 0 0 0;");
+            alertDetailContainer.getChildren().add(sectionTitle2);
+
+            for (Document doc : peringatanDocs) {
+                alertDetailContainer.getChildren().add(createAlertDocCard(doc, false));
+            }
+        }
+
+        if (mendesakDocs.isEmpty() && peringatanDocs.isEmpty()) {
+            Label noAlert = new Label("✅ Tidak ada dokumen yang memerlukan perhatian saat ini.");
+            noAlert.setStyle("-fx-font-size: 14px; -fx-text-fill: #16a34a; -fx-font-weight: bold;");
+            alertDetailContainer.getChildren().add(noAlert);
+        }
+    }
+
+    private VBox createAlertDocCard(Document doc, boolean isMendesak) {
+        LocalDate today = LocalDate.now();
+        long daysRemaining = ChronoUnit.DAYS.between(today, doc.getTanggalBerakhir());
+
+        String borderColor = isMendesak ? "#ef4444" : "#f97316";
+        String bgColor = isMendesak ? "#fef2f2" : "#fff7ed";
+
+        VBox card = new VBox(8);
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; " +
+                "-fx-border-color: " + borderColor + "; -fx-border-width: 0 0 0 4; " +
+                "-fx-border-radius: 10; -fx-padding: 16 20; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 6, 0, 0, 2);");
+
+        // Header: Jenis badge + Mitra
+        String jenisText = doc.getJenis() != null ? doc.getJenis() : "";
+        if (jenisText.contains("(")) jenisText = jenisText.substring(0, jenisText.indexOf("(")).trim();
+        if (jenisText.contains(" ")) jenisText = jenisText.split(" ")[0];
+
+        Label jenisBadge = new Label(jenisText);
+        jenisBadge.setStyle(getJenisStyle(jenisText) + "-fx-padding: 4 10; -fx-background-radius: 6; -fx-font-weight: bold; -fx-font-size: 11px;");
+
+        Label mitraLabel = new Label(doc.getMitra() != null ? doc.getMitra() : "-");
+        mitraLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
+        mitraLabel.setWrapText(true);
+
+        HBox headerBox = new HBox(10, jenisBadge, mitraLabel);
+        headerBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Date info
+        Label dateLabel = new Label("📅 " + formatTanggalIndonesia(doc.getTanggalBerakhir()));
+        dateLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b;");
+
+        // Days remaining
+        Label daysLabel = new Label("⏱ " + daysRemaining + " hari lagi");
+        daysLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: " + (isMendesak ? "#dc2626" : "#ea580c") + "; -fx-font-weight: bold;");
+
+        HBox dateBox = new HBox(20, dateLabel, daysLabel);
+        dateBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Warning message box
+        String warningTitle = isMendesak
+                ? "🚨 SEGERA SIAPKAN DOKUMEN DAN LAKUKAN KOORDINASI"
+                : "⚠ PERHATIKAN MASA BERLAKU DOKUMEN";
+        String warningMsg = isMendesak
+                ? "Masa berlaku dokumen akan segera berakhir dalam waktu kurang dari 7 hari.\nSegera lakukan koordinasi dengan pihak terkait untuk memastikan kelengkapan administrasi."
+                : "Masa berlaku dokumen akan berakhir dalam waktu kurang dari 14 hari.\nPersiapkan dokumen perpanjangan atau tindak lanjut yang diperlukan.";
+
+        Label warningTitleLabel = new Label(warningTitle);
+        warningTitleLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: " + (isMendesak ? "#991b1b" : "#9a3412") + ";");
+
+        Label warningMsgLabel = new Label(warningMsg);
+        warningMsgLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: " + (isMendesak ? "#b91c1c" : "#c2410c") + ";");
+        warningMsgLabel.setWrapText(true);
+
+        VBox warningBox = new VBox(4, warningTitleLabel, warningMsgLabel);
+        warningBox.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 8; -fx-padding: 12 16;");
+
+        card.getChildren().addAll(headerBox, dateBox, warningBox);
+        return card;
     }
 
     private void updateMenuStyle(Button activeButton) {
