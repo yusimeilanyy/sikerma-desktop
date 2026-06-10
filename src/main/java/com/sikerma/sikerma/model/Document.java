@@ -5,6 +5,9 @@ import java.time.LocalDate;
 public class Document {
     private int id;
     private String nomorDokumen;
+    private String nomorDokumenPemda;
+    private String nomorDokumenMitra;
+    private String pemilik;
     private String jenis;
     private String mitra;
     private String kategori;
@@ -24,6 +27,15 @@ public class Document {
 
     public String getNomorDokumen() { return nomorDokumen; }
     public void setNomorDokumen(String nomorDokumen) { this.nomorDokumen = nomorDokumen; }
+
+    public String getNomorDokumenPemda() { return nomorDokumenPemda; }
+    public void setNomorDokumenPemda(String nomorDokumenPemda) { this.nomorDokumenPemda = nomorDokumenPemda; }
+
+    public String getNomorDokumenMitra() { return nomorDokumenMitra; }
+    public void setNomorDokumenMitra(String nomorDokumenMitra) { this.nomorDokumenMitra = nomorDokumenMitra; }
+
+    public String getPemilik() { return pemilik; }
+    public void setPemilik(String pemilik) { this.pemilik = pemilik; }
 
     public String getJenis() { return jenis; }
     public void setJenis(String jenis) { this.jenis = jenis; }
